@@ -62,6 +62,7 @@ class MainWidget : public QWidget
 		QAction* showSkyAction;
 		QAction* showTextAction;
 		QAction* showDiskBorderAction;
+		QAction* showKeyAction;
 		QAction* useMultisampling;
 		QAction* saveScreenshotsAction;
 		QAction* setWindowSizeAction;

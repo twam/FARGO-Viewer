@@ -22,6 +22,7 @@ class OpenGLWidget : public QGLWidget
 		void updateShowOrbits(bool value);
 		void updateShowSky(bool value);
 		void updateShowText(bool value);
+		void updateShowKey(bool value);
 		void updateUseMultisampling(bool value);
 		void updateSaveScreenshots(bool value);
 
@@ -81,12 +82,19 @@ class OpenGLWidget : public QGLWidget
 		// text
 		bool showText;
 
+		// key
+		bool showKey;
+		void renderKey();
+
 		bool saveScreenshots;
 		bool supportMultisampling;
 		bool useMultisampling;
 		Simulation* simulation;
 
 		Palette* palette;
+		double minimumValue;
+		double maximumValue;
+		bool logarithmicScale;
 };
 
 #endif

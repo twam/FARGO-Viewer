@@ -24,8 +24,8 @@ QColor Palette::getColor(double value) const
 	while ((pos < values.size()) && (values.at(pos) < value)) {
 		pos++;
 	}
-
-	if (pos == 0) {
+	
+	if ((values.size() == 1) || (pos == 0)) {
 		ret = *colors.at(0);
 	} else if (pos == values.size()) {
 		ret = *colors.at(pos-1);
@@ -50,7 +50,7 @@ void Palette::addColor(double value, QColor color)
 	}
 
 	values.insert(values.begin()+pos,value);
-	
+
 	QColor *colorPointer = new QColor;
 	*colorPointer = color;
 	colors.insert(colors.begin()+pos,colorPointer);
@@ -58,6 +58,7 @@ void Palette::addColor(double value, QColor color)
 
 void Palette::deleteColorById(unsigned int id)
 {
+	delete colors.at(id);
 	colors.erase(colors.begin()+id);
 	values.erase(values.begin()+id);
 }
@@ -72,7 +73,16 @@ unsigned int Palette::getNumberOfColors() const
 	return colors.size();
 }
 
-double* Palette::getValueById(unsigned int id)
+double Palette::getValueById(unsigned int id)
 {
-	return &values.at(id);
+	return values.at(id);
+}
+
+void Palette::clear()
+{
+	for (unsigned int pos = 0; pos < colors.size(); pos++) {
+		delete colors.at(pos);
+	}
+	colors.clear();
+	values.clear();
 }

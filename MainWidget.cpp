@@ -109,6 +109,12 @@ void MainWidget::createMenu()
 	openGLWidget->updateShowText(true);
 	connect(showTextAction, SIGNAL(toggled(bool)), openGLWidget, SLOT(updateShowText(bool)));
 	
+	showKeyAction = viewMenu->addAction(tr("Show &Key"));
+	showKeyAction->setCheckable(true);
+	showKeyAction->setChecked(true);
+	openGLWidget->updateShowKey(true);
+	connect(showKeyAction, SIGNAL(toggled(bool)), openGLWidget, SLOT(updateShowKey(bool)));
+	
 	useMultisampling = viewMenu->addAction(tr("Use &Multisampling"));
 	useMultisampling->setCheckable(true);
 	useMultisampling->setChecked(true);

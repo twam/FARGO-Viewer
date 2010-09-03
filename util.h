@@ -1,6 +1,8 @@
 #ifndef _UTIL_H_
 #define _UTIL_H_
 
+#include <math.h>
+
 template< typename T >
 inline T pow2(T x)
 {
@@ -29,6 +31,11 @@ template< typename T >
 inline T max(T x, T y)
 {
 	return x > y ? x : y;
+}
+
+inline double log10(double x)
+{
+	return log(x)/log(10.0);
 }
 
 #endif

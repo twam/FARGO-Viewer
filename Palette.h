@@ -10,8 +10,8 @@ class Palette
 		Palette();
 		~Palette();
 
-		inline double getMinValue() const { return values.at(0); }
-		inline double getMaxValue() const { return values.at(values.size()-1); }
+		inline double getMinValue() const { return values.size() > 0 ? values.at(0) : 0; }
+		inline double getMaxValue() const { return values.size() > 0 ? values.at(values.size()-1) : 1; }
 		void addColor(double value, QColor color);
 		QColor getColorNormalized(double value) const;
 		QColor getColor(double value) const;
@@ -19,7 +19,9 @@ class Palette
 		void deleteColorById(unsigned int id);
 		QColor* getColorById(unsigned int id);
 		unsigned int getNumberOfColors() const;
-		double* getValueById(unsigned int id);
+		double getValueById(unsigned int id);
+
+		void clear();
 
 	private:
 		std::vector<QColor*> colors;

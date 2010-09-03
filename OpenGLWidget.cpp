@@ -136,6 +136,10 @@ OpenGLWidget::OpenGLWidget(QWidget *parent)
 	palette->addColor(5,QColor(0xFF,0xFF,0xFF,0xFF));
 
 	resetCamera();
+	
+	minimumValue = 4e1;
+	maximumValue = 4e3;
+	logarithmicScale = true;
 }
 
 OpenGLWidget::~OpenGLWidget()
@@ -302,7 +306,7 @@ void OpenGLWidget::renderPlanets()
 		glPushMatrix();
 		glTranslated(simulation->getPlanetPosition(i)[0],simulation->getPlanetPosition(i)[1],simulation->getPlanetPosition(i)[2]);
 		GLUquadricObj* quadric = gluNewQuadric();
-		//glBindTexture(GL_TEXTURE_2D, textures[0].textureID);
+		glBindTexture(GL_TEXTURE_2D, textures[0].textureID);
 		gluQuadricTexture(quadric,true);
 		glMaterialfv(GL_FRONT, GL_EMISSION, mat_emission);
 		gluSphere(quadric,0.25,32,32);
@@ -446,7 +450,7 @@ void OpenGLWidget::renderDisk()
 	for (unsigned int nRadial = 0; nRadial <= simulation->getNRadial(); ++nRadial) {
 		for (unsigned int nAzimuthal = 0; nAzimuthal < simulation->getNAzimuthal(); ++nAzimuthal) {
 			index =  nRadial * simulation->getNAzimuthal() + nAzimuthal;
-			diskColor(&diskColors[4*index], simulation->getDensity()[index], 50, 5000, false);
+			diskColor(&diskColors[4*index], simulation->getDensity()[index], minimumValue, maximumValue, logarithmicScale);
 		}
 	}
 
@@ -472,17 +476,16 @@ void OpenGLWidget::diskColor(GLfloat* color, double value, double minValue, doub
 	if (logarithmic == false) {
 		value = min(value, maxValue);
 		value = max(value, minValue);
-		value = value/(maxValue-minValue);
+		value = (value-minValue)/(maxValue-minValue);
 	} else {
 		if (minValue == 0)
 			minValue = DBL_EPSILON;
-		maxValue = log(maxValue)/log(10);
-		minValue = log(minValue)/log(10);
-		value = log(value)/log(10);
+		maxValue = log10(maxValue);
+		minValue = log10(minValue);
+		value = log10(value);
 		value = min(value, maxValue);
 		value = max(value, minValue);
-		value = value/(maxValue-minValue);
-		value = log(value)/log(10);
+		value = (value-minValue)/(maxValue-minValue);
 	}
 
 	qcolor = palette->getColorNormalized(value);
@@ -571,6 +574,110 @@ void OpenGLWidget::renderSky()
 	glDisable(GL_POINT_SMOOTH);
 }
 
+void OpenGLWidget::renderKey()
+{
+	const GLfloat marginRight = 40;
+	const GLfloat marginTop = 35;
+	const unsigned int maxPos = 10;
+	const unsigned int fontSize = 10;
+	const GLfloat keyWidth = 20.0;
+	GLfloat keyHeight = height()-2*marginTop;
+	QFont fontNormal = QFont("Helvetica", fontSize, QFont::Bold);
+	QFont fontScript = QFont("Helvetica", fontSize*3.0/4.0, QFont::Bold);
+	QFontMetrics fontMetricsNormal = QFontMetrics(fontNormal);
+
+	glPushMatrix();
+	glLoadIdentity();
+	glMatrixMode(GL_PROJECTION);
+	glPushMatrix();
+	glLoadIdentity();
+	glOrtho(0,width(),0,height(),-150,150);
+	glMatrixMode(GL_MODELVIEW);
+
+	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+
+	glBegin(GL_QUAD_STRIP);
+	for (unsigned int id = 0; id < palette->getNumberOfColors(); ++id) {
+		QColor color = *(palette->getColorById(id));
+		color.setAlphaF(1.0);
+		qglColor(color);
+		GLfloat cellHeight = keyHeight*(1.0-(palette->getValueById(id)-palette->getMinValue())/(palette->getMaxValue()-palette->getMinValue()));
+		glVertex2f(width()-marginRight-keyWidth,height()-marginTop-cellHeight);
+		glVertex2f(width()-marginRight,height()-marginTop-cellHeight);
+	}
+	glEnd();
+
+	glColor3f(1.0,1.0,1.0);
+	glBegin(GL_LINE_LOOP);
+	glVertex2f(width()-marginRight-keyWidth,height()-marginTop-keyHeight);
+	glVertex2f(width()-marginRight,height()-marginTop-keyHeight);
+	glVertex2f(width()-marginRight,height()-marginTop);
+	glVertex2f(width()-marginRight-keyWidth,height()-marginTop);
+	glEnd();
+
+	if (logarithmicScale) {
+		int a,b, a_max, b_max;
+		double pos;
+
+		if (minimumValue>1) {
+			a = trunc(log10(minimumValue));
+			b = trunc(minimumValue/pow(10,a));
+		} else {
+			a = trunc(log10(minimumValue)-1);
+			b = trunc(minimumValue/pow(10,a));
+		}
+
+		if (maximumValue>1) {
+			a_max = trunc(log10(maximumValue));
+			b_max = trunc(maximumValue/pow(10,a_max));
+			if (b_max == 10) {
+				a_max++;
+				b_max = 1;
+			}
+		} else {
+			a_max = trunc(log10(maximumValue)-1);
+			b_max = trunc(maximumValue/pow(10,a_max));			
+		}
+		
+	/*	printf("a = %u     b = %u\n",a,b);
+		printf("amax = %u     bmax = %u\n",a_max,b_max); */
+
+		while ((a<a_max) || ((a==a_max) && (b<=b_max))) {
+			glBegin(GL_LINE_STRIP);
+			pos = (1-((double)a+log10((double)b)-log10(minimumValue))/(log10(maximumValue)-log10(minimumValue)));
+			glVertex2f(width()-marginRight+3.0, height()-marginTop-pos*keyHeight);
+			glVertex2f(width()-marginRight+0.0, height()-marginTop-pos*keyHeight);
+			glEnd();
+
+			if (b==1) {
+				renderText(width()-marginRight+6.0, marginTop+(double)fontSize/2.0+keyHeight*pos, QString("10"),fontNormal);
+				renderText(width()-marginRight+6.0+fontMetricsNormal.width("10"), marginTop-(double)fontSize/2.0+(double)fontSize/2.0+keyHeight*pos, QString("%1").arg(a),fontScript);
+			}
+			
+			b++;
+			if (b == 10) {
+				b = 1;
+				a++;
+			}
+		}
+	} else {
+		for (unsigned int pos = 0; pos <= maxPos; ++pos) {
+			glBegin(GL_LINE_STRIP);
+			glVertex2f(width()-marginRight+3.0, height()-marginTop-(keyHeight*(GLfloat)pos/(GLfloat)maxPos));
+			glVertex2f(width()-marginRight+0.0, height()-marginTop-(keyHeight*(GLfloat)pos/(GLfloat)maxPos));
+			glEnd();
+
+			renderText(width()-marginRight+6.0, marginTop+(double)fontSize/2.0+keyHeight*(GLfloat)pos/(GLfloat)maxPos, QString("%1").arg((float)(maxPos-pos)/(float)(maxPos)*(maximumValue-minimumValue)+minimumValue),fontNormal);
+		}
+	}
+
+	glMatrixMode(GL_PROJECTION);
+	glPopMatrix();
+	glMatrixMode(GL_MODELVIEW);
+
+	glPopMatrix();
+}
+
 void OpenGLWidget::paintGL()
 {
 	if (useMultisampling && supportMultisampling) {
@@ -610,6 +717,10 @@ void OpenGLWidget::paintGL()
 	if (showDiskBorder)
 		renderDiskBorder();
 
+	if (useMultisampling && supportMultisampling) {
+		glDisable(GL_MULTISAMPLE_ARB);
+	}
+
 	if (showText) {
 		if (simulation != NULL) {
 			glColor3f(1.0,1.0,1.0);
@@ -617,8 +728,8 @@ void OpenGLWidget::paintGL()
 		}
 	}
 
-	if (useMultisampling && supportMultisampling) {
-		glDisable(GL_MULTISAMPLE_ARB);
+	if (showKey) {
+		renderKey();
 	}
 
 	glFlush();
@@ -670,6 +781,11 @@ void OpenGLWidget::updateShowText(bool value)
 	update();
 }
 
+void OpenGLWidget::updateShowKey(bool value)
+{
+	showKey = value;
+	update();
+}
 
 void OpenGLWidget::updateUseMultisampling(bool value)
 {
