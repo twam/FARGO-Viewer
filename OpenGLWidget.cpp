@@ -129,6 +129,12 @@ OpenGLWidget::OpenGLWidget(QWidget *parent)
 	skyDistance = 300.0;
 	skyNumberOfObjects = 1000;
 
+	palette = new Palette;
+	palette->addColor(1,QColor(0x00,0x00,0x00,0x00));
+	palette->addColor(3,QColor(0xFF,0x00,0x00,0xFF));
+	palette->addColor(4,QColor(0xFF,0x80,0x00,0xFF));
+	palette->addColor(5,QColor(0xFF,0xFF,0xFF,0xFF));
+
 	resetCamera();
 }
 
@@ -145,6 +151,8 @@ OpenGLWidget::~OpenGLWidget()
 
 	// clean up sky data
 	delete [] skyVertices;
+
+	delete palette;
 }
 
 void OpenGLWidget::resetCamera()
@@ -438,7 +446,7 @@ void OpenGLWidget::renderDisk()
 	for (unsigned int nRadial = 0; nRadial <= simulation->getNRadial(); ++nRadial) {
 		for (unsigned int nAzimuthal = 0; nAzimuthal < simulation->getNAzimuthal(); ++nAzimuthal) {
 			index =  nRadial * simulation->getNAzimuthal() + nAzimuthal;
-			diskColor(&diskColors[4*index], simulation->getDensity()[index], 100, 10000, true);
+			diskColor(&diskColors[4*index], simulation->getDensity()[index], 50, 5000, false);
 		}
 	}
 
@@ -459,6 +467,8 @@ void OpenGLWidget::renderDisk()
 
 void OpenGLWidget::diskColor(GLfloat* color, double value, double minValue, double maxValue, bool logarithmic)
 {
+	QColor qcolor;
+
 	if (logarithmic == false) {
 		value = min(value, maxValue);
 		value = max(value, minValue);
@@ -475,27 +485,12 @@ void OpenGLWidget::diskColor(GLfloat* color, double value, double minValue, doub
 		value = log(value)/log(10);
 	}
 
-	if (value < 3.0/5.0) {
-		value *= 5.0/3.0;
-		color[0] = 1.0;
-		color[1] = 0; 
-		color[2] = 0;
-		color[3] = value*1.0;
-	} else if (value < 4.0/5.0) {
-		value -= 3.0/5.0;
-		value *= 5.0/1.0;
-		color[0] = 1.0;
-		color[1] = value*0.5;
-		color[2] = 0;
-		color[3] = 1.0;
-	} else {
-		value -= 4.0/5.0;
-		value *= 5.0/1.0;
-		color[0] = 1.0;
-		color[1] = 0.5+value*0.5;
-		color[2] = value*1.0;
-		color[3] = 1.0;
-	}
+	qcolor = palette->getColorNormalized(value);
+
+	color[0] = qcolor.redF();
+	color[1] = qcolor.greenF();
+	color[2] = qcolor.blueF();
+	color[3] = qcolor.alphaF();
 }
 
 void OpenGLWidget::initDiskBorder()

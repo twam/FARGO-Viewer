@@ -3,6 +3,7 @@
 
 #include <QGLWidget>
 #include "Simulation.h"
+#include "Palette.h"
 
 class OpenGLWidget : public QGLWidget
 {
@@ -83,7 +84,9 @@ class OpenGLWidget : public QGLWidget
 		bool saveScreenshots;
 		bool supportMultisampling;
 		bool useMultisampling;
-		Simulation *simulation;
+		Simulation* simulation;
+
+		Palette* palette;
 };
 
 #endif
