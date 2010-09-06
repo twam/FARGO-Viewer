@@ -14,6 +14,8 @@ class OpenGLWidget : public QGLWidget
 		~OpenGLWidget();
 		void setSimulation(Simulation *simulation);
 		void resetCamera();
+		
+		inline Palette* getPalette() { return palette; }
 
 	public slots:
 		void updateShowDisk(bool value);

@@ -15,6 +15,7 @@
 #include <QTimer>
 
 #include "OpenGLWidget.h"
+#include "PaletteWidget.h"
 #include "Simulation.h"
 
 class MainWidget : public QWidget
@@ -27,6 +28,10 @@ class MainWidget : public QWidget
 		void setSimulation(Simulation* simulation);
 
 		OpenGLWidget* openGLWidget;
+		PaletteWidget* paletteWidget;
+
+	protected:
+		void closeEvent(QCloseEvent *event);
 
 	public slots:
 		void timerUpdate();
@@ -41,6 +46,7 @@ class MainWidget : public QWidget
 		void clickedDecreaseFps();
 		void triggeredOpen();
 		void triggeredExit();
+		void triggeredEditPalette();
 		void triggeredSetWindowSize();
 		void changedTimeline(int value);
 		void fpsUpdate();
@@ -66,6 +72,7 @@ class MainWidget : public QWidget
 		QAction* useMultisampling;
 		QAction* saveScreenshotsAction;
 		QAction* setWindowSizeAction;
+		QAction* editPaletteAction;
 		
 		QToolButton* playPauseButton;
 		QToolButton* stopButton;

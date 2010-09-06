@@ -139,7 +139,7 @@ OpenGLWidget::OpenGLWidget(QWidget *parent)
 	
 	minimumValue = 4e1;
 	maximumValue = 4e3;
-	logarithmicScale = true;
+	logarithmicScale = false;
 }
 
 OpenGLWidget::~OpenGLWidget()
@@ -578,7 +578,6 @@ void OpenGLWidget::renderKey()
 {
 	const GLfloat marginRight = 40;
 	const GLfloat marginTop = 35;
-	const unsigned int maxPos = 10;
 	const unsigned int fontSize = 10;
 	const GLfloat keyWidth = 20.0;
 	GLfloat keyHeight = height()-2*marginTop;
@@ -597,13 +596,18 @@ void OpenGLWidget::renderKey()
 	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
 	glBegin(GL_QUAD_STRIP);
-	for (unsigned int id = 0; id < palette->getNumberOfColors(); ++id) {
-		QColor color = *(palette->getColorById(id));
+	unsigned int count = palette->getNumberOfColors();
+	unsigned int value;
+	value = palette->getFirstValue();
+	while (count > 0) {
+		QColor color = palette->getColorByValue(value);
 		color.setAlphaF(1.0);
 		qglColor(color);
-		GLfloat cellHeight = keyHeight*(1.0-(palette->getValueById(id)-palette->getMinValue())/(palette->getMaxValue()-palette->getMinValue()));
+		GLfloat cellHeight = keyHeight*(1.0-((double)value-(double)palette->getMinValue())/((double)palette->getMaxValue()-(double)palette->getMinValue()));
 		glVertex2f(width()-marginRight-keyWidth,height()-marginTop-cellHeight);
 		glVertex2f(width()-marginRight,height()-marginTop-cellHeight);
+		count--;
+		value = palette->getNextValue(value);
 	}
 	glEnd();
 
@@ -638,7 +642,7 @@ void OpenGLWidget::renderKey()
 			a_max = trunc(log10(maximumValue)-1);
 			b_max = trunc(maximumValue/pow(10,a_max));			
 		}
-		
+
 	/*	printf("a = %u     b = %u\n",a,b);
 		printf("amax = %u     bmax = %u\n",a_max,b_max); */
 
@@ -651,7 +655,7 @@ void OpenGLWidget::renderKey()
 
 			if (b==1) {
 				renderText(width()-marginRight+6.0, marginTop+(double)fontSize/2.0+keyHeight*pos, QString("10"),fontNormal);
-				renderText(width()-marginRight+6.0+fontMetricsNormal.width("10"), marginTop-(double)fontSize/2.0+(double)fontSize/2.0+keyHeight*pos, QString("%1").arg(a),fontScript);
+				renderText(width()-marginRight+6.0+fontMetricsNormal.width("10")+1, marginTop-(double)fontSize/2.0+(double)fontSize/2.0+keyHeight*pos, QString("%1").arg(a),fontScript);
 			}
 			
 			b++;
@@ -661,13 +665,31 @@ void OpenGLWidget::renderKey()
 			}
 		}
 	} else {
-		for (unsigned int pos = 0; pos <= maxPos; ++pos) {
+		unsigned int maxTics = trunc(keyHeight/(2.0*fontSize));
+
+		/*
+		// show min value
+		glBegin(GL_LINE_STRIP);
+		glVertex2f(width()-marginRight+3.0, height()-marginTop-(keyHeight*1.0));
+		glVertex2f(width()-marginRight+0.0, height()-marginTop-(keyHeight*1.0));
+		glEnd();
+		renderText(width()-marginRight+6.0, marginTop+(double)fontSize/2.0+keyHeight*1.0, QString("%1").arg(minimumValue),fontNormal);
+
+
+		// show max value
+		glBegin(GL_LINE_STRIP);
+		glVertex2f(width()-marginRight+3.0, height()-marginTop-(keyHeight*0.0));
+		glVertex2f(width()-marginRight+0.0, height()-marginTop-(keyHeight*0.0));
+		glEnd();
+		renderText(width()-marginRight+6.0, marginTop+(double)fontSize/2.0+keyHeight*0.0, QString("%1").arg(maximumValue),fontNormal); */
+
+		for (unsigned int pos = 0; pos <= maxTics; ++pos) {
 			glBegin(GL_LINE_STRIP);
-			glVertex2f(width()-marginRight+3.0, height()-marginTop-(keyHeight*(GLfloat)pos/(GLfloat)maxPos));
-			glVertex2f(width()-marginRight+0.0, height()-marginTop-(keyHeight*(GLfloat)pos/(GLfloat)maxPos));
+			glVertex2f(width()-marginRight+3.0, height()-marginTop-(keyHeight*(GLfloat)pos/(GLfloat)maxTics));
+			glVertex2f(width()-marginRight+0.0, height()-marginTop-(keyHeight*(GLfloat)pos/(GLfloat)maxTics));
 			glEnd();
 
-			renderText(width()-marginRight+6.0, marginTop+(double)fontSize/2.0+keyHeight*(GLfloat)pos/(GLfloat)maxPos, QString("%1").arg((float)(maxPos-pos)/(float)(maxPos)*(maximumValue-minimumValue)+minimumValue),fontNormal);
+			renderText(width()-marginRight+6.0, marginTop+(double)fontSize/2.0+keyHeight*(GLfloat)pos/(GLfloat)maxTics, QString("%1").arg((float)(maxTics-pos)/(float)(maxTics)*(maximumValue-minimumValue)+minimumValue),fontNormal);
 		}
 	}
 

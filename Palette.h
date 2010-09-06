@@ -1,8 +1,9 @@
-#ifndef _PALATTE_H_
+#ifndef _PALETTE_H_
 #define _PALETTE_H_
 
 #include <vector>
 #include <QColor>
+#include <QMap>
 
 class Palette
 {
@@ -10,22 +11,21 @@ class Palette
 		Palette();
 		~Palette();
 
-		inline double getMinValue() const { return values.size() > 0 ? values.at(0) : 0; }
-		inline double getMaxValue() const { return values.size() > 0 ? values.at(values.size()-1) : 1; }
-		void addColor(double value, QColor color);
+		inline unsigned int getMinValue() const { return colorMap.isEmpty() ? 0 : colorMap.keys().first(); }
+		inline unsigned int getMaxValue() const { return colorMap.isEmpty() ? 0 : colorMap.keys().last(); }
+		void addColor(unsigned int value, const QColor& color);
 		QColor getColorNormalized(double value) const;
 		QColor getColor(double value) const;
 
-		void deleteColorById(unsigned int id);
-		QColor* getColorById(unsigned int id);
+		void deleteColorByValue(unsigned int value);
+		const QColor& getColorByValue(unsigned int value) const;
 		unsigned int getNumberOfColors() const;
-		double getValueById(unsigned int id);
-
 		void clear();
+		unsigned int getFirstValue();
+		unsigned int getNextValue(unsigned int prevValue);
 
 	private:
-		std::vector<QColor*> colors;
-		std::vector<double> values;
+		QMap<unsigned int, QColor> colorMap;
 };
 
 #endif

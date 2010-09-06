@@ -13,6 +13,8 @@ MainWidget::MainWidget(QWidget *parent)
 	fps = 10.0;
 
 	openGLWidget = new OpenGLWidget(this);
+	paletteWidget = new PaletteWidget(openGLWidget->getPalette(),0);
+	connect(paletteWidget, SIGNAL(paletteUpdated()), openGLWidget, SLOT(update()));
 
 	createMenu();
 	createButtons();
@@ -39,6 +41,13 @@ MainWidget::MainWidget(QWidget *parent)
 
 MainWidget::~MainWidget()
 {
+	delete openGLWidget;
+	delete paletteWidget;
+}
+
+void MainWidget::closeEvent(QCloseEvent* /*event*/)
+{
+	paletteWidget->close();
 }
 
 void MainWidget::createMenu()
@@ -67,6 +76,9 @@ void MainWidget::createMenu()
 
 	setWindowSizeAction = optionsMenu->addAction(tr("Set &Window Size"));
 	connect(setWindowSizeAction, SIGNAL(triggered()), this, SLOT(triggeredSetWindowSize()));
+	
+	editPaletteAction = optionsMenu->addAction(tr("Edit &Palette"));
+	connect(editPaletteAction, SIGNAL(triggered()), this, SLOT(triggeredEditPalette()));
 
 	menuBar->addMenu(optionsMenu);
 
@@ -393,4 +405,10 @@ void MainWidget::triggeredSetWindowSize()
 		openGLWidget->setFixedSize(QSize(width,height));
 
 	setMinimumSize(QSize(width+30,height+80));
+}
+
+void MainWidget::triggeredEditPalette()
+{
+	paletteWidget->show();
+	paletteWidget->activateWindow();
 }

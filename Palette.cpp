@@ -18,71 +18,68 @@ QColor Palette::getColorNormalized(double value) const
 
 QColor Palette::getColor(double value) const
 {
-	unsigned int pos = 0;
+	QMap<unsigned int, QColor>::const_iterator pos = colorMap.begin();
 	QColor ret;
 
-	while ((pos < values.size()) && (values.at(pos) < value)) {
+	while ((pos != colorMap.end()) && (pos.key() < value)) {
 		pos++;
 	}
-	
-	if ((values.size() == 1) || (pos == 0)) {
-		ret = *colors.at(0);
-	} else if (pos == values.size()) {
-		ret = *colors.at(pos-1);
-	} else {
-		double factor = (value-values.at(pos-1))/(values.at(pos)-values.at(pos-1));
 
-		ret.setRedF((1-factor)*colors.at(pos-1)->redF()+(factor)*colors.at(pos)->redF());
-		ret.setGreenF((1-factor)*colors.at(pos-1)->greenF()+(factor)*colors.at(pos)->greenF());
-		ret.setBlueF((1-factor)*colors.at(pos-1)->blueF()+(factor)*colors.at(pos)->blueF());
-		ret.setAlphaF((1-factor)*colors.at(pos-1)->alphaF()+(factor)*colors.at(pos)->alphaF());
+	if ((colorMap.size() == 1) || (pos == colorMap.begin())) {
+		ret = pos.value();
+	} else if (pos == colorMap.end()) {
+		ret = pos.value();
+	} else {
+		double factor = (value-(pos-1).key())/((pos.key())-((pos-1).key()));
+
+		ret.setRedF((1-factor)*(pos-1).value().redF()+(factor)*pos.value().redF());
+		ret.setGreenF((1-factor)*(pos-1).value().greenF()+(factor)*pos.value().greenF());
+		ret.setBlueF((1-factor)*(pos-1).value().blueF()+(factor)*pos.value().blueF());
+		ret.setAlphaF((1-factor)*(pos-1).value().alphaF()+(factor)*pos.value().alphaF());
 	}
 
 	return ret;
 }
 
-void Palette::addColor(double value, QColor color)
+void Palette::addColor(unsigned int value, const QColor& color)
 {
-	unsigned int pos = 0;
-	
-	while ((pos < values.size()) && (values.at(pos) < value)) {
-		pos++;
-	}
-
-	values.insert(values.begin()+pos,value);
-
-	QColor *colorPointer = new QColor;
-	*colorPointer = color;
-	colors.insert(colors.begin()+pos,colorPointer);
+	colorMap.insert(value, color);
 }
 
-void Palette::deleteColorById(unsigned int id)
+void Palette::deleteColorByValue(unsigned int value)
 {
-	delete colors.at(id);
-	colors.erase(colors.begin()+id);
-	values.erase(values.begin()+id);
+	colorMap.erase(colorMap.find(value));
 }
 
-QColor* Palette::getColorById(unsigned int id)
+const QColor& Palette::getColorByValue(unsigned int value) const
 {
-	return colors.at(id);
+	return colorMap.find(value).value();
 }
 
 unsigned int Palette::getNumberOfColors() const
 {
-	return colors.size();
+	return colorMap.size();
 }
 
-double Palette::getValueById(unsigned int id)
+unsigned int Palette::getFirstValue()
 {
-	return values.at(id);
+	if (colorMap.isEmpty()) {
+		return 0;
+	} else {
+		return colorMap.find(colorMap.keys().first()).key();
+	}
+}
+
+unsigned int Palette::getNextValue(unsigned int prevValue)
+{
+	if ((colorMap.isEmpty()) || (prevValue == colorMap.find(colorMap.keys().last()).key())) {
+		return 0;
+	} else {
+		return colorMap.keys().at(colorMap.keys().indexOf(prevValue)+1);
+	}
 }
 
 void Palette::clear()
 {
-	for (unsigned int pos = 0; pos < colors.size(); pos++) {
-		delete colors.at(pos);
-	}
-	colors.clear();
-	values.clear();
+	colorMap.clear();
 }
