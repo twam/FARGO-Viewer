@@ -3,6 +3,7 @@
 
 #include <QWidget>
 #include <QAction>
+#include <QActionGroup>
 #include <QMenu>
 #include <QMenuBar>
 #include <QCheckBox>
@@ -51,6 +52,11 @@ class MainWidget : public QWidget
 		void changedTimeline(int value);
 		void fpsUpdate();
 		void timestepUpdate();
+		void toggledQuantityTemperature(bool value);
+		void toggledQuantityDensity(bool value);
+		void toogledSetLogarithmic(bool value);
+		void triggeredSetMinimumValue();
+		void triggeredSetMaximumValue();
 
 	private:
 		void createMenu();
@@ -58,8 +64,10 @@ class MainWidget : public QWidget
 
 		QMenuBar* menuBar;
 		QMenu* fileMenu;
+		QMenu* quantityMenu;
 		QMenu* viewMenu;
 		QMenu* optionsMenu;
+		QActionGroup* quantityActionGroup;
 		QAction* exitAction;
 		QAction* openAction;
 		QAction* showDiskAction;
@@ -72,7 +80,12 @@ class MainWidget : public QWidget
 		QAction* useMultisampling;
 		QAction* saveScreenshotsAction;
 		QAction* setWindowSizeAction;
+		QAction* setLogarithmicAction;
+		QAction* setMinimumValueAction;
+		QAction* setMaximumValueAction;
 		QAction* editPaletteAction;
+		QAction* quantityDensityAction;
+		QAction* quantityTemperatureAction;
 		
 		QToolButton* playPauseButton;
 		QToolButton* stopButton;

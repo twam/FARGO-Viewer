@@ -137,9 +137,9 @@ OpenGLWidget::OpenGLWidget(QWidget *parent)
 
 	resetCamera();
 	
-	minimumValue = 4e1;
-	maximumValue = 4e3;
-	logarithmicScale = false;
+	minimumValue = 10;
+	maximumValue = 1000;
+	logarithmicScale = true;
 }
 
 OpenGLWidget::~OpenGLWidget()
@@ -450,7 +450,7 @@ void OpenGLWidget::renderDisk()
 	for (unsigned int nRadial = 0; nRadial <= simulation->getNRadial(); ++nRadial) {
 		for (unsigned int nAzimuthal = 0; nAzimuthal < simulation->getNAzimuthal(); ++nAzimuthal) {
 			index =  nRadial * simulation->getNAzimuthal() + nAzimuthal;
-			diskColor(&diskColors[4*index], simulation->getDensity()[index], minimumValue, maximumValue, logarithmicScale);
+			diskColor(&diskColors[4*index], simulation->getQuantity()[index], minimumValue, maximumValue, logarithmicScale);
 		}
 	}
 
@@ -818,5 +818,35 @@ void OpenGLWidget::updateUseMultisampling(bool value)
 void OpenGLWidget::updateSaveScreenshots(bool value)
 {
 	saveScreenshots = value;
+	update();
+}
+
+void OpenGLWidget::setLogarithmic(bool value)
+{
+	logarithmicScale = value;
+
+	if (minimumValue == 0)
+		minimumValue = DBL_MIN;
+
+	update();
+}
+
+void OpenGLWidget::setMinimumValue(double value)
+{
+	minimumValue = value;
+	
+	if (minimumValue > maximumValue)
+		maximumValue = minimumValue;
+
+	update();
+}
+
+void OpenGLWidget::setMaximumValue(double value)
+{
+	maximumValue = value;
+
+	if (maximumValue < minimumValue)
+		minimumValue = maximumValue;
+
 	update();
 }

@@ -16,6 +16,10 @@ class OpenGLWidget : public QGLWidget
 		void resetCamera();
 		
 		inline Palette* getPalette() { return palette; }
+		
+		void setLogarithmic(bool value);
+		void setMinimumValue(double value);
+		void setMaximumValue(double value);
 
 	public slots:
 		void updateShowDisk(bool value);

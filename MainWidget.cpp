@@ -4,6 +4,7 @@
 #include <QIntValidator>
 #include <QFileDialog>
 #include <QInputDialog>
+#include <float.h>
 #include "Simulation.h"
 #include "util.h"
 
@@ -80,10 +81,40 @@ void MainWidget::createMenu()
 	editPaletteAction = optionsMenu->addAction(tr("Edit &Palette"));
 	connect(editPaletteAction, SIGNAL(triggered()), this, SLOT(triggeredEditPalette()));
 
+	setLogarithmicAction = optionsMenu->addAction(tr("Set &Logarithmic"));
+	setLogarithmicAction->setCheckable(true);
+	setLogarithmicAction->setChecked(false);
+	this->toogledSetLogarithmic(false);
+ 	connect(setLogarithmicAction, SIGNAL(toggled(bool)), this, SLOT(toogledSetLogarithmic(bool)));
+
+	setMinimumValueAction = optionsMenu->addAction(tr("Set &Minimum Value"));
+	connect(setMinimumValueAction, SIGNAL(triggered()), this, SLOT(triggeredSetMinimumValue()));
+	
+	setMaximumValueAction = optionsMenu->addAction(tr("Set Ma&ximum Value"));
+	connect(setMaximumValueAction, SIGNAL(triggered()), this, SLOT(triggeredSetMaximumValue()));
+
 	menuBar->addMenu(optionsMenu);
+
+	// quantity
+	quantityMenu = new QMenu(tr("Quantity"), this);
+
+	quantityActionGroup = new QActionGroup(this);
+	quantityActionGroup->setExclusive(true);
+
+	quantityDensityAction = quantityActionGroup->addAction(tr("&Density"));
+	quantityDensityAction->setCheckable(true);
+	quantityDensityAction->setChecked(true);
+	connect(quantityDensityAction, SIGNAL(toggled(bool)), this, SLOT(toggledQuantityDensity(bool)));
+
+	quantityTemperatureAction = quantityActionGroup->addAction(tr("&Temperature"));
+	quantityTemperatureAction->setCheckable(true);
+	connect(quantityTemperatureAction, SIGNAL(toggled(bool)), this, SLOT(toggledQuantityTemperature(bool)));
+
+	quantityMenu->addActions(quantityActionGroup->actions());
 
 	// view
 	viewMenu = new QMenu(tr("&View"), this);
+	viewMenu->addMenu(quantityMenu);
 
 	showDiskAction = viewMenu->addAction(tr("Show &Disk"));
 	showDiskAction->setCheckable(true);
@@ -411,4 +442,44 @@ void MainWidget::triggeredEditPalette()
 {
 	paletteWidget->show();
 	paletteWidget->activateWindow();
+}
+
+void MainWidget::toggledQuantityTemperature(bool value)
+{
+	if (value) {
+		simulation->setQuantityType(Simulation::TEMPERATURE);
+		openGLWidget->update();
+	}
+}
+
+void MainWidget::toggledQuantityDensity(bool value)
+{
+	if (value) {
+		simulation->setQuantityType(Simulation::DENSITY);
+		openGLWidget->update();	
+	}
+}
+
+void MainWidget::toogledSetLogarithmic(bool value)
+{
+	openGLWidget->setLogarithmic(value);
+}
+
+void MainWidget::triggeredSetMinimumValue()
+{
+	bool ok;
+	double value = QInputDialog::getDouble(this, tr("Minimum Value"), tr("Minimum Value:"), 0, -DBL_MAX, DBL_MAX, 10, &ok);
+	if (ok) {
+		openGLWidget->setMinimumValue(value);
+	}
+}
+
+void MainWidget::triggeredSetMaximumValue()
+{
+	bool ok;
+	double value = QInputDialog::getDouble(this, tr("Maximum Value"), tr("Maximum Value:"), 0, -DBL_MAX, DBL_MAX, 10, &ok);
+
+	if (ok) {
+		openGLWidget->setMaximumValue(value);
+	}
 }

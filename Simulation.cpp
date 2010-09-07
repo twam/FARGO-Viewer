@@ -12,8 +12,6 @@ Simulation::Simulation()
 	planetConfigFilename = NULL;
 	NPlanets = 0;
 	readGhostCells = false;
-	readDensity = true;
-	readTemperature = true;
 }
 
 Simulation::~Simulation()
@@ -27,8 +25,7 @@ Simulation::~Simulation()
 	free(planetMasses);
 
 	delete [] radii;
-	delete [] density;
-	delete [] temperature;
+	delete [] quantity;
 }
 
 int Simulation::loadFromFile(const char* filename)
@@ -98,8 +95,7 @@ int Simulation::loadFromFile(const char* filename)
 		sscanf(buffer, "%lf", &radii[i]);
 	}
 
-	density = new double[(NRadial+1)*NAzimuthal];
-	temperature = new double[(NRadial+1)*NAzimuthal];
+	quantity = new double[(NRadial+1)*NAzimuthal];
 
 	// load planets
 	NPlanets = 1;
@@ -218,16 +214,21 @@ int Simulation::loadTimestep(unsigned int timestep)
 	}
 
 	// read density
-	if (readDensity) {
-		filename = new char[strlen(outputDirectory)+1+12+(unsigned int)(log(timestep)/log(10)+1)];
-		sprintf(filename, "%sgasdens%u.dat", outputDirectory, timestep);
-		loadGrid(density, filename, true);
-	}
+	
+	switch (quantityType) {
+		case DENSITY:
+			filename = new char[strlen(outputDirectory)+1+12+(unsigned int)(log(timestep)/log(10)+1)];
+			sprintf(filename, "%sgasdens%u.dat", outputDirectory, timestep);
+			loadGrid(quantity, filename, true);
+			break;
 
-	if (readTemperature) {
-		filename = new char[strlen(outputDirectory)+1+19+(unsigned int)(log(timestep)/log(10)+1)];
-		sprintf(filename, "%sgasTemperature%u.dat", outputDirectory, timestep);
-		loadGrid(temperature, filename, true);
+		case TEMPERATURE:
+			filename = new char[strlen(outputDirectory)+1+19+(unsigned int)(log(timestep)/log(10)+1)];
+			sprintf(filename, "%sgasTemperature%u.dat", outputDirectory, timestep);
+			loadGrid(quantity, filename, true);
+			break;
+		default:
+			break;
 	}
 
 	currentTimestep = timestep;
@@ -292,4 +293,12 @@ void Simulation::loadGrid(double* dest, const char* filename, bool scalar)
 loadGrid_cleanUp:
 	delete [] buffer;
 	fclose(fd);
+}
+
+void Simulation::setQuantityType(QuantityType type)
+{
+	if (quantityType != type) {
+		quantityType = type;
+		loadTimestep(currentTimestep);
+	}
 }

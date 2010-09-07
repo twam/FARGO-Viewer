@@ -8,6 +8,13 @@ class Simulation : public QObject
 	Q_OBJECT
 
 	public:
+
+		enum QuantityType {
+			DENSITY,
+			TEMPERATURE,
+			N_QUANTITY_TYPES
+		};
+
 		Simulation();
 		~Simulation();
 		int loadFromFile(const char* filename);
@@ -23,10 +30,11 @@ class Simulation : public QObject
 		inline double getRMin() { return rMin; }
 		inline double getRMax() { return rMax; }
 		inline double* getRadii() { return radii; }
-		inline const double* getDensity() const { return density; }
-		inline const double* getTemperature() const { return temperature; }
+		inline const double* getQuantity() const { return quantity; }
+		void setQuantityType(QuantityType type);
 
 	private:
+		QuantityType quantityType;
 		bool readGhostCells;
 		char *configFilename;
 		char *planetConfigFilename;
@@ -42,11 +50,7 @@ class Simulation : public QObject
 		double* planetVelocities;
 		double* planetMasses;
 		double* radii;
-		double* density;
-		double* temperature;
-
-		bool readDensity;
-		bool readTemperature;
+		double* quantity;
 
 		void loadGrid(double* dest, const char* filename, bool scalar);
 
