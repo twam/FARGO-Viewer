@@ -33,9 +33,4 @@ inline T max(T x, T y)
 	return x > y ? x : y;
 }
 
-inline double log10(double x)
-{
-	return log(x)/log(10.0);
-}
-
 #endif
