@@ -309,7 +309,7 @@ void OpenGLWidget::renderPlanets()
 		glBindTexture(GL_TEXTURE_2D, textures[0].textureID);
 		gluQuadricTexture(quadric,true);
 		glMaterialfv(GL_FRONT, GL_EMISSION, mat_emission);
-		gluSphere(quadric,0.25,32,32);
+		gluSphere(quadric,simulation->getRMin()*0.1,32,32);
 		glMaterialfv(GL_FRONT, GL_EMISSION, no_mat);
 		gluDeleteQuadric(quadric);
 		glBindTexture(GL_TEXTURE_2D, 0);
