@@ -20,6 +20,8 @@ class OpenGLWidget : public QGLWidget
 		void setLogarithmic(bool value);
 		void setMinimumValue(double value);
 		void setMaximumValue(double value);
+		inline double getMinimumValue() const { return minimumValue; }
+		inline double getMaximumValue() const { return maximumValue; }
 
 	public slots:
 		void updateShowDisk(bool value);

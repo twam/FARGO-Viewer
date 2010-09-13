@@ -374,6 +374,7 @@ void MainWidget::setSimulation(Simulation *simulation)
 		beginningButton->setEnabled(false);
 		endButton->setEnabled(false);
 		timestepLineEdit->setEnabled(false);
+		quantityActionGroup->setEnabled(false);
 	} else {
 		connect(simulation, SIGNAL(dataUpdated()), this, SLOT(updateFromSimulation()));
 		connect(simulation, SIGNAL(dataUpdated()), openGLWidget, SLOT(update()));
@@ -386,6 +387,7 @@ void MainWidget::setSimulation(Simulation *simulation)
 		beginningButton->setEnabled(true);
 		endButton->setEnabled(true);
 		timestepLineEdit->setEnabled(true);
+		quantityActionGroup->setEnabled(true);
 
 		timelineSlider->setMinimum(0);
 		timelineSlider->setMaximum(simulation->getLastTimeStep());
@@ -468,7 +470,7 @@ void MainWidget::toogledSetLogarithmic(bool value)
 void MainWidget::triggeredSetMinimumValue()
 {
 	bool ok;
-	double value = QInputDialog::getDouble(this, tr("Minimum Value"), tr("Minimum Value:"), 0, -DBL_MAX, DBL_MAX, 10, &ok);
+	double value = QInputDialog::getDouble(this, tr("Minimum Value"), tr("Minimum Value:"), openGLWidget->getMinimumValue(), -DBL_MAX, DBL_MAX, 10, &ok);
 	if (ok) {
 		openGLWidget->setMinimumValue(value);
 	}
@@ -477,7 +479,7 @@ void MainWidget::triggeredSetMinimumValue()
 void MainWidget::triggeredSetMaximumValue()
 {
 	bool ok;
-	double value = QInputDialog::getDouble(this, tr("Maximum Value"), tr("Maximum Value:"), 0, -DBL_MAX, DBL_MAX, 10, &ok);
+	double value = QInputDialog::getDouble(this, tr("Maximum Value"), tr("Maximum Value:"), openGLWidget->getMaximumValue(), -DBL_MAX, DBL_MAX, 10, &ok);
 
 	if (ok) {
 		openGLWidget->setMaximumValue(value);

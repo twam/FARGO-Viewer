@@ -241,7 +241,7 @@ void OpenGLWidget::initializeGL()
 
 	glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
 	glDepthFunc(GL_LEQUAL);
-	
+
 	initSky();
 
 	glEnable(GL_TEXTURE_2D);
