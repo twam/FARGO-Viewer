@@ -51,6 +51,7 @@ class MainWidget : public QWidget
 		void triggeredSetWindowSize();
 		void changedTimeline(int value);
 		void fpsUpdate();
+		void skipUpdate();
 		void timestepUpdate();
 		void toggledQuantityTemperature(bool value);
 		void toggledQuantityDensity(bool value);
@@ -98,6 +99,7 @@ class MainWidget : public QWidget
 
 		QLineEdit* timestepLineEdit;
 		QLineEdit* fpsLineEdit;
+		QLineEdit* skipLineEdit;
 
 		QSlider* timelineSlider;
 
@@ -108,6 +110,7 @@ class MainWidget : public QWidget
 
 		Simulation* simulation;
 		double fps;
+		unsigned int skip;
 
 	protected:
 

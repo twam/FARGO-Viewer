@@ -12,6 +12,7 @@ MainWidget::MainWidget(QWidget *parent)
 : QWidget(parent), simulation(NULL)
 {
 	fps = 10.0;
+	skip = 0;
 
 	openGLWidget = new OpenGLWidget(this);
 	paletteWidget = new PaletteWidget(openGLWidget->getPalette(),0);
@@ -237,6 +238,13 @@ void MainWidget::createButtons()
 	decreaseFpsButton->setIconSize(iconSize);
 	decreaseFpsButton->setToolTip(tr("Decrease FPS"));
 	connect(decreaseFpsButton, SIGNAL(clicked()), this, SLOT(clickedDecreaseFps()));
+
+	skipLineEdit = new QLineEdit;
+	QIntValidator* validator3 = new QIntValidator;
+	validator3->setBottom(0);
+	skipLineEdit->setValidator(validator3);
+	skipLineEdit->setText("0");
+	connect(skipLineEdit, SIGNAL(returnPressed()), this, SLOT(skipUpdate()));
 	
 	buttonsLayout = new QHBoxLayout;
 	buttonsLayout->addWidget(beginningButton);
@@ -252,13 +260,14 @@ void MainWidget::createButtons()
 	buttonsLayout->addWidget(decreaseFpsButton);
 	buttonsLayout->addWidget(fpsLineEdit);
 	buttonsLayout->addWidget(increaseFpsButton);
+	buttonsLayout->addWidget(skipLineEdit);
 }
 
 void MainWidget::timerUpdate()
 {
 	unsigned int currentTimestep = simulation->getCurrentTimestep();
 	
-	if ((currentTimestep == simulation->getLastTimeStep()) || (simulation->loadTimestep(currentTimestep+1)<0)) {
+	if ((currentTimestep == simulation->getLastTimeStep()) || (simulation->loadTimestep(currentTimestep+1+skip)<0)) {
 		clickedStop();
 	}
 }
@@ -354,6 +363,11 @@ void MainWidget::fpsUpdate()
 {
 	fps = fpsLineEdit->text().toDouble();
 	timer->setInterval(1000.0/fps);
+}
+
+void MainWidget::skipUpdate()
+{
+	skip = skipLineEdit->text().toInt();
 }
 
 void MainWidget::timestepUpdate()
