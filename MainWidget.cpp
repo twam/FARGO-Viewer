@@ -11,6 +11,8 @@
 MainWidget::MainWidget(QWidget *parent)
 : QWidget(parent), simulation(NULL)
 {
+	settings = new QSettings("FARGO","FARGO Viewer");
+
 	fps = 10.0;
 	skip = 0;
 
@@ -27,7 +29,7 @@ MainWidget::MainWidget(QWidget *parent)
 	mainLayout->addWidget(openGLWidget);
 	mainLayout->addLayout(buttonsLayout);
 	setLayout(mainLayout);
-	
+
 	// set window title
 	setWindowTitle(tr("FARGO Viewer"));
 
@@ -37,7 +39,7 @@ MainWidget::MainWidget(QWidget *parent)
 	timer->setInterval(1000.0/fps);
 
 	connect(timer, SIGNAL(timeout()), this, SLOT(timerUpdate()));
-	
+
 	setSimulation(NULL);
 }
 
@@ -78,7 +80,7 @@ void MainWidget::createMenu()
 
 	setWindowSizeAction = optionsMenu->addAction(tr("Set &Window Size"));
 	connect(setWindowSizeAction, SIGNAL(triggered()), this, SLOT(triggeredSetWindowSize()));
-	
+
 	editPaletteAction = optionsMenu->addAction(tr("Edit &Palette"));
 	connect(editPaletteAction, SIGNAL(triggered()), this, SLOT(triggeredEditPalette()));
 
@@ -90,7 +92,7 @@ void MainWidget::createMenu()
 
 	setMinimumValueAction = optionsMenu->addAction(tr("Set &Minimum Value"));
 	connect(setMinimumValueAction, SIGNAL(triggered()), this, SLOT(triggeredSetMinimumValue()));
-	
+
 	setMaximumValueAction = optionsMenu->addAction(tr("Set Ma&ximum Value"));
 	connect(setMaximumValueAction, SIGNAL(triggered()), this, SLOT(triggeredSetMaximumValue()));
 
@@ -122,7 +124,7 @@ void MainWidget::createMenu()
 	showDiskAction->setChecked(true);
 	openGLWidget->updateShowDisk(true);
 	connect(showDiskAction, SIGNAL(toggled(bool)), openGLWidget, SLOT(updateShowDisk(bool)));
-	
+
 	showDiskBorderAction = viewMenu->addAction(tr("Show disk &border"));
 	showDiskBorderAction->setCheckable(true);
 	showDiskBorderAction->setChecked(false);
@@ -140,7 +142,7 @@ void MainWidget::createMenu()
 	showOrbitsAction->setChecked(true);
 	openGLWidget->updateShowOrbits(true);
 	connect(showOrbitsAction, SIGNAL(toggled(bool)), openGLWidget, SLOT(updateShowOrbits(bool)));
-	
+
 	showSkyAction = viewMenu->addAction(tr("Show &Sky"));
 	showSkyAction->setCheckable(true);
 	showSkyAction->setChecked(true);
@@ -152,20 +154,20 @@ void MainWidget::createMenu()
 	showTextAction->setChecked(true);
 	openGLWidget->updateShowText(true);
 	connect(showTextAction, SIGNAL(toggled(bool)), openGLWidget, SLOT(updateShowText(bool)));
-	
+
 	showKeyAction = viewMenu->addAction(tr("Show &Key"));
 	showKeyAction->setCheckable(true);
 	showKeyAction->setChecked(true);
 	openGLWidget->updateShowKey(true);
 	connect(showKeyAction, SIGNAL(toggled(bool)), openGLWidget, SLOT(updateShowKey(bool)));
-	
+
 	useMultisampling = viewMenu->addAction(tr("Use &Multisampling"));
 	useMultisampling->setCheckable(true);
 	useMultisampling->setChecked(true);
 	openGLWidget->updateUseMultisampling(true);
 	connect(useMultisampling, SIGNAL(toggled(bool)), openGLWidget, SLOT(updateUseMultisampling(bool)));
 
-	menuBar->addMenu(viewMenu);	
+	menuBar->addMenu(viewMenu);
 }
 
 void MainWidget::createButtons()
@@ -193,25 +195,25 @@ void MainWidget::createButtons()
 	backwardButton->setIconSize(iconSize);
 	backwardButton->setToolTip(tr("Jump Backward"));
 	connect(backwardButton, SIGNAL(clicked()), this, SLOT(clickedBackward()));
-	
+
 	forwardButton = new QToolButton;
 	forwardButton->setIcon(style()->standardIcon(QStyle::SP_MediaSeekForward));
 	forwardButton->setIconSize(iconSize);
 	forwardButton->setToolTip(tr("Jump Forward"));
 	connect(forwardButton, SIGNAL(clicked()), this, SLOT(clickedForward()));
-	
+
 	beginningButton = new QToolButton;
 	beginningButton->setIcon(style()->standardIcon(QStyle::SP_MediaSkipBackward));
 	beginningButton->setIconSize(iconSize);
 	beginningButton->setToolTip(tr("Jump to Beginning"));
 	connect(beginningButton, SIGNAL(clicked()), this, SLOT(clickedBeginning()));
-	
+
 	endButton = new QToolButton;
 	endButton->setIcon(style()->standardIcon(QStyle::SP_MediaSkipForward));
 	endButton->setIconSize(iconSize);
 	endButton->setToolTip(tr("Jump to End"));
 	connect(endButton, SIGNAL(clicked()), this, SLOT(clickedEnd()));
-	
+
 	timestepLineEdit = new QLineEdit;
 	QIntValidator* validator1 = new QIntValidator;
 	validator1->setBottom(0);
@@ -245,7 +247,7 @@ void MainWidget::createButtons()
 	skipLineEdit->setValidator(validator3);
 	skipLineEdit->setText("0");
 	connect(skipLineEdit, SIGNAL(returnPressed()), this, SLOT(skipUpdate()));
-	
+
 	buttonsLayout = new QHBoxLayout;
 	buttonsLayout->addWidget(beginningButton);
 	buttonsLayout->addWidget(backwardButton);
@@ -266,7 +268,7 @@ void MainWidget::createButtons()
 void MainWidget::timerUpdate()
 {
 	unsigned int currentTimestep = simulation->getCurrentTimestep();
-	
+
 	if ((currentTimestep == simulation->getLastTimeStep()) || (simulation->loadTimestep(currentTimestep+1+skip)<0)) {
 		clickedStop();
 	}
@@ -304,7 +306,7 @@ void MainWidget::clickedPlayPause(bool value)
 void MainWidget::clickedStop()
 {
 	timer->stop();
-	
+
 	playPauseButton->setCheckable(false);
 	playPauseButton->setIcon(style()->standardIcon(QStyle::SP_MediaPlay));
 	playPauseButton->setToolTip(tr("Play"));
@@ -327,7 +329,7 @@ void MainWidget::clickedBackward()
 	if (simulation->loadTimestep(max(0,(int)currentTimestep-100))<0) {
 		clickedStop();
 	}
-	
+
 }
 
 void MainWidget::clickedBeginning()
@@ -379,7 +381,7 @@ void MainWidget::setSimulation(Simulation *simulation)
 {
 	this->simulation = simulation;
 
-	if (simulation == NULL) { 
+	if (simulation == NULL) {
 		timelineSlider->setEnabled(false);
 		playPauseButton->setEnabled(false);
 		stopButton->setEnabled(false);
@@ -419,7 +421,7 @@ void MainWidget::triggeredExit()
 
 void MainWidget::triggeredOpen()
 {
-	QString filename = QFileDialog::getOpenFileName(this, tr("Open Simulation"));
+	QString filename = QFileDialog::getOpenFileName(this, tr("Open Simulation"), settings->value("lastSimulation").toString());
 
 	if (filename.isNull()) {
 		delete simulation;
@@ -430,6 +432,7 @@ void MainWidget::triggeredOpen()
 		simulation = new Simulation;
 		simulation->loadFromFile(filename.toAscii().data());
 		setSimulation(simulation);
+		settings->setValue("lastSimulation", filename);
 	}
 }
 
@@ -472,7 +475,7 @@ void MainWidget::toggledQuantityDensity(bool value)
 {
 	if (value) {
 		simulation->setQuantityType(Simulation::DENSITY);
-		openGLWidget->update();	
+		openGLWidget->update();
 	}
 }
 

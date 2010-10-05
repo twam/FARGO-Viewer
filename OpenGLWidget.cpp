@@ -18,7 +18,7 @@ typedef struct
 TextureImage textures[1];
 
 /**
-	loads a TGA file into memory 
+	loads a TGA file into memory
 */
 bool loadTGA(TextureImage *texture, const char *filename)
 {
@@ -136,7 +136,7 @@ OpenGLWidget::OpenGLWidget(QWidget *parent)
 	palette->addColor(5,QColor(0xFF,0xFF,0xFF,0xFF));
 
 	resetCamera();
-	
+
 	minimumValue = 10;
 	maximumValue = 1000;
 	logarithmicScale = true;
@@ -167,7 +167,7 @@ void OpenGLWidget::resetCamera()
 
 	cameraRotationX =0.0;
 	cameraRotationY = 0.0;
-	cameraRotationZ = 0.0;	
+	cameraRotationZ = 0.0;
 }
 
 void OpenGLWidget::setSimulation(Simulation* simulation)
@@ -216,7 +216,7 @@ void OpenGLWidget::initializeGL()
 	supportMultisampling = checkExtension("GL_ARB_multisample");
 
 	glEnable(GL_DEPTH_TEST);
-	
+
 //	glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
 //	glEnable(GL_COLOR_MATERIAL);
 
@@ -309,7 +309,7 @@ void OpenGLWidget::renderPlanets()
 		glBindTexture(GL_TEXTURE_2D, textures[0].textureID);
 		gluQuadricTexture(quadric,true);
 		glMaterialfv(GL_FRONT, GL_EMISSION, mat_emission);
-		gluSphere(quadric,simulation->getRMin()*0.1,32,32);
+		gluSphere(quadric,0.1,32,32);
 		glMaterialfv(GL_FRONT, GL_EMISSION, no_mat);
 		gluDeleteQuadric(quadric);
 		glBindTexture(GL_TEXTURE_2D, 0);

@@ -4,6 +4,7 @@
 #include <QWidget>
 #include <QAction>
 #include <QActionGroup>
+#include <QSettings>
 #include <QMenu>
 #include <QMenuBar>
 #include <QCheckBox>
@@ -107,6 +108,8 @@ class MainWidget : public QWidget
 		QVBoxLayout* mainLayout;
 		
 		QTimer* timer;
+
+		QSettings* settings;
 
 		Simulation* simulation;
 		double fps;
