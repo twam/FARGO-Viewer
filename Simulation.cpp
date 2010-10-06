@@ -12,6 +12,7 @@ Simulation::Simulation()
 	planetConfigFilename = NULL;
 	NPlanets = 0;
 	readGhostCells = false;
+	quantityType = DENSITY;
 }
 
 Simulation::~Simulation()
@@ -213,8 +214,7 @@ int Simulation::loadTimestep(unsigned int timestep)
 		fclose(fd);
 	}
 
-	// read density
-	
+	// read grid
 	switch (quantityType) {
 		case DENSITY:
 			filename = new char[strlen(outputDirectory)+1+12+(unsigned int)(log(timestep)/log(10)+1)];
