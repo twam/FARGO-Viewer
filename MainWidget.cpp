@@ -176,7 +176,7 @@ void MainWidget::createButtons()
 
 	timelineSlider = new QSlider(Qt::Horizontal);
 	timelineSlider->setMinimumWidth(200);
-	connect(timelineSlider, SIGNAL(valueChanged(int)), this, SLOT(changedTimeline(int)));
+	connect(timelineSlider, SIGNAL(sliderMoved(int)), this, SLOT(changedTimeline(int)));
 
 	playPauseButton = new QToolButton;
 	playPauseButton->setIcon(style()->standardIcon(QStyle::SP_MediaPlay));
