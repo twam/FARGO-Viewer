@@ -122,6 +122,9 @@ OpenGLWidget::OpenGLWidget(QWidget *parent)
 	orbitsVertices = NULL;
 	orbitsDetailLevel = 128;
 
+	rocheLobeVertices = NULL;
+	rocheLobeDetailLevel = 256;
+	
 	diskBorderVertices = NULL;
 	diskBorderDetailLevel = 128;
 
@@ -153,6 +156,9 @@ OpenGLWidget::~OpenGLWidget()
 	// clean up orbit data
 	delete [] orbitsVertices;
 
+	// clean up Roche Lobe data
+	delete [] rocheLobeVertices;
+
 	// clean up sky data
 	delete [] skyVertices;
 
@@ -177,6 +183,7 @@ void OpenGLWidget::setSimulation(Simulation* simulation)
 	initDisk();
 	initDiskBorder();
 	initOrbits();
+	initRocheLobe();
 
 	resetCamera();
 
@@ -352,7 +359,7 @@ void OpenGLWidget::renderOrbits()
 		double A_x =  j/mass * (1.0+mass) * v_y - 1.0 * 1.0 * pow2(1.0+mass) * x/d; 
 		double A_y = -j/mass * (1.0+mass) * v_x - 1.0 * 1.0 * pow2(1.0+mass) * y/d;
 		double eccentricity = sqrt(pow2(A_x) + pow2(A_y))/(1.0*1.0*pow2(1.0+mass));
-	        double semi_major_axis = pow2(j/mass) / (1.0 * (1.0+mass)) / (1.0 - pow2(eccentricity));
+		double semi_major_axis = pow2(j/mass) / (1.0 * (1.0+mass)) / (1.0 - pow2(eccentricity));
 		double semi_minor_axis = semi_major_axis * sqrt(1.0 -pow2(eccentricity));
 
 		for (unsigned int j = 0; j < orbitsDetailLevel; ++j) {
@@ -373,6 +380,71 @@ void OpenGLWidget::renderOrbits()
 		glPopMatrix();
 	}
 
+	glDisable(GL_LINE_SMOOTH);
+}
+
+void OpenGLWidget::initRocheLobe()
+{
+	if (simulation == NULL)
+		return;
+
+	// we need at least 2 planets :)
+	if (simulation->getNumberOfPlanets() < 2)
+		return;
+
+	rocheLobeVertices = new GLfloat[3*rocheLobeDetailLevel];
+}
+
+void OpenGLWidget::renderRocheLobe()
+{
+	if (simulation == NULL)
+		return;
+
+	if (simulation->getNumberOfPlanets() < 2)
+		return;
+
+	// mass ratio
+	double q = simulation->getPlanetMass(1)[0]/simulation->getPlanetMass(0)[0];
+
+	double L1 = calculateL1Point(q);
+
+	glEnable(GL_LINE_SMOOTH);
+	glPushMatrix();
+
+	double x = simulation->getPlanetPosition(1)[0];
+	double y = simulation->getPlanetPosition(1)[1];
+	//double v_x = simulation->getPlanetVelocity(1)[0];
+	//double v_y = simulation->getPlanetVelocity(1)[1];
+	//double mass = simulation->getPlanetMass(1)[0];
+
+	// angular momentum
+	//double j = mass * x * v_y - mass * y * v_x;
+	// distance
+	//double d = sqrt(pow2(x)+pow2(y));
+	// Runge-Lenz vector A = (p x L) - m * G * m * M * r/|r|;
+	//double A_x =  j/mass * (1.0+mass) * v_y - 1.0 * 1.0 * pow2(1.0+mass) * x/d; 
+	//double A_y = -j/mass * (1.0+mass) * v_x - 1.0 * 1.0 * pow2(1.0+mass) * y/d;
+	//double eccentricity = sqrt(pow2(A_x) + pow2(A_y))/(1.0*1.0*pow2(1.0+mass));
+	//double semi_major_axis = pow2(j/mass) / (1.0 * (1.0+mass)) / (1.0 - pow2(eccentricity));
+
+	double phi = atan2(y,x);
+
+	for (unsigned int j = 0; j < rocheLobeDetailLevel; ++j) {
+		double r = calculateRocheRadius(q, L1, rochePotential(q,L1,0),2.0*M_PI/(float)rocheLobeDetailLevel*(float)j+phi)*sqrt(x*x+y*y);
+		rocheLobeVertices[3*j+0] = r*sin(2.0*M_PI/(float)rocheLobeDetailLevel*(float)j);
+		rocheLobeVertices[3*j+1] = r*cos(2.0*M_PI/(float)rocheLobeDetailLevel*(float)j);
+		rocheLobeVertices[3*j+2] = 0.0;
+	}
+
+//	glTranslated(eccentricity*semi_major_axis,0,0);
+
+	glColor3ub(0x80,0x80,0x80);
+	glBegin(GL_LINE_LOOP);
+	for (unsigned int j = 0; j < rocheLobeDetailLevel; ++j) {
+		glVertex3fv(&rocheLobeVertices[3*j]);
+	}
+	glEnd();
+	
 	glDisable(GL_LINE_SMOOTH);
 }
 
@@ -730,6 +802,9 @@ void OpenGLWidget::paintGL()
 	if (showOrbits)
 		renderOrbits();
 
+	if (showRocheLobe)
+		renderRocheLobe();
+
 	if (showPlanets)
 		renderPlanets();
 
@@ -788,6 +863,12 @@ void OpenGLWidget::updateShowPlanets(bool value)
 void OpenGLWidget::updateShowOrbits(bool value)
 {
 	showOrbits = value;
+	update();
+}
+
+void OpenGLWidget::updateShowRocheLobe(bool value)
+{
+	showRocheLobe = value;
 	update();
 }
 

@@ -4,6 +4,7 @@
 #include <QGLWidget>
 #include "Simulation.h"
 #include "Palette.h"
+#include "RocheLobe.h"
 
 class OpenGLWidget : public QGLWidget
 {
@@ -28,6 +29,7 @@ class OpenGLWidget : public QGLWidget
 		void updateShowDiskBorder(bool value);
 		void updateShowPlanets(bool value);
 		void updateShowOrbits(bool value);
+		void updateShowRocheLobe(bool value);
 		void updateShowSky(bool value);
 		void updateShowText(bool value);
 		void updateShowKey(bool value);
@@ -79,6 +81,13 @@ class OpenGLWidget : public QGLWidget
 		void initOrbits();
 		void renderOrbits();
 
+		// roche lobe
+		bool showRocheLobe;
+		GLfloat* rocheLobeVertices;
+		unsigned int rocheLobeDetailLevel;
+		void initRocheLobe();
+		void renderRocheLobe();
+		
 		// sky
 		bool showSky;
 		double skyDistance;

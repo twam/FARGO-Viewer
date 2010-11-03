@@ -75,6 +75,7 @@ class MainWidget : public QWidget
 		QAction* showDiskAction;
 		QAction* showPlanetsAction;
 		QAction* showOrbitsAction;
+		QAction* showRocheLobeAction;
 		QAction* showSkyAction;
 		QAction* showTextAction;
 		QAction* showDiskBorderAction;

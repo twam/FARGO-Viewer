@@ -143,6 +143,12 @@ void MainWidget::createMenu()
 	openGLWidget->updateShowOrbits(true);
 	connect(showOrbitsAction, SIGNAL(toggled(bool)), openGLWidget, SLOT(updateShowOrbits(bool)));
 
+	showRocheLobeAction = viewMenu->addAction(tr("Show &Roche Lobe"));
+	showRocheLobeAction->setCheckable(true);
+	showRocheLobeAction->setChecked(false);
+	openGLWidget->updateShowRocheLobe(false);
+	connect(showRocheLobeAction, SIGNAL(toggled(bool)), openGLWidget, SLOT(updateShowRocheLobe(bool)));
+	
 	showSkyAction = viewMenu->addAction(tr("Show &Sky"));
 	showSkyAction->setCheckable(true);
 	showSkyAction->setChecked(true);
