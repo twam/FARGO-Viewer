@@ -799,6 +799,9 @@ void OpenGLWidget::paintGL()
 	glRotated(cameraRotationY, 0.0, 1.0, 0.0);
 	glRotated(cameraRotationX, 1.0, 0.0, 0.0);
 
+	if (showDisk)
+		renderDisk();
+
 	if (showOrbits)
 		renderOrbits();
 
@@ -807,9 +810,6 @@ void OpenGLWidget::paintGL()
 
 	if (showPlanets)
 		renderPlanets();
-
-	if (showDisk)
-		renderDisk();
 	
 	if (showDiskBorder)
 		renderDiskBorder();
