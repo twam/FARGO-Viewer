@@ -695,7 +695,7 @@ void OpenGLWidget::renderKey()
 		int a,b, a_max, b_max;
 		double pos;
 
-		if (minimumValue>1) {
+		if (minimumValue>=1) {
 			a = trunc(log10(minimumValue));
 			b = trunc(minimumValue/pow(10,a));
 		} else {
@@ -703,7 +703,7 @@ void OpenGLWidget::renderKey()
 			b = trunc(minimumValue/pow(10,a));
 		}
 
-		if (maximumValue>1) {
+		if (maximumValue>=1) {
 			a_max = trunc(log10(maximumValue));
 			b_max = trunc(maximumValue/pow(10,a_max));
 			if (b_max == 10) {
@@ -715,10 +715,8 @@ void OpenGLWidget::renderKey()
 			b_max = trunc(maximumValue/pow(10,a_max));			
 		}
 
-	/*	printf("a = %u     b = %u\n",a,b);
-		printf("amax = %u     bmax = %u\n",a_max,b_max); */
-
 		while ((a<a_max) || ((a==a_max) && (b<=b_max))) {
+			//printf("a: %i/%i b: %i/%i\n",a,a_max,b,b_max);
 			glBegin(GL_LINE_STRIP);
 			pos = (1-((double)a+log10((double)b)-log10(minimumValue))/(log10(maximumValue)-log10(minimumValue)));
 			glVertex2f(width()-marginRight+3.0, height()-marginTop-pos*keyHeight);
@@ -904,6 +902,8 @@ void OpenGLWidget::updateSaveScreenshots(bool value)
 
 void OpenGLWidget::setLogarithmic(bool value)
 {
+	printf("changed setLogarithmic to %i\n", (int)value);
+	
 	logarithmicScale = value;
 
 	if (minimumValue == 0)

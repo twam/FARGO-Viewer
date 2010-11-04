@@ -41,6 +41,10 @@ MainWidget::MainWidget(QWidget *parent)
 	connect(timer, SIGNAL(timeout()), this, SLOT(timerUpdate()));
 
 	setSimulation(NULL);
+
+	// restore settings
+	openGLWidget->setMinimumValue(settings->value("minimumValue",10).toDouble());
+	openGLWidget->setMaximumValue(settings->value("maximumValue",1000).toDouble());
 }
 
 MainWidget::~MainWidget()
@@ -86,8 +90,8 @@ void MainWidget::createMenu()
 
 	setLogarithmicAction = optionsMenu->addAction(tr("Set &Logarithmic"));
 	setLogarithmicAction->setCheckable(true);
-	setLogarithmicAction->setChecked(false);
-	this->toogledSetLogarithmic(false);
+	setLogarithmicAction->setChecked(settings->value("logarithmic",false).toBool());
+	this->toogledSetLogarithmic(settings->value("logarithmic",false).toBool());
  	connect(setLogarithmicAction, SIGNAL(toggled(bool)), this, SLOT(toogledSetLogarithmic(bool)));
 
 	setMinimumValueAction = optionsMenu->addAction(tr("Set &Minimum Value"));
@@ -488,6 +492,7 @@ void MainWidget::toggledQuantityDensity(bool value)
 void MainWidget::toogledSetLogarithmic(bool value)
 {
 	openGLWidget->setLogarithmic(value);
+	settings->setValue("logarithmic", value);
 }
 
 void MainWidget::triggeredSetMinimumValue()
@@ -495,6 +500,7 @@ void MainWidget::triggeredSetMinimumValue()
 	bool ok;
 	double value = QInputDialog::getDouble(this, tr("Minimum Value"), tr("Minimum Value:"), openGLWidget->getMinimumValue(), -DBL_MAX, DBL_MAX, 10, &ok);
 	if (ok) {
+		settings->setValue("minimumValue", value);
 		openGLWidget->setMinimumValue(value);
 	}
 }
@@ -505,6 +511,7 @@ void MainWidget::triggeredSetMaximumValue()
 	double value = QInputDialog::getDouble(this, tr("Maximum Value"), tr("Maximum Value:"), openGLWidget->getMaximumValue(), -DBL_MAX, DBL_MAX, 10, &ok);
 
 	if (ok) {
+		settings->setValue("maximumValue", value);
 		openGLWidget->setMaximumValue(value);
 	}
 }
