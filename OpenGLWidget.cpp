@@ -831,12 +831,12 @@ void OpenGLWidget::paintGL()
 
 	if (saveScreenshots && (simulation != NULL)) {
 		char temp[200];
-		sprintf(temp, "/tmp/image_%i.jpg", simulation->getCurrentTimestep());
+		sprintf(temp, "/tmp/image_%i.png", simulation->getCurrentTimestep());
 		QString filename = temp;
-	
+
 		// get image
 		QImage image = grabFrameBuffer();
-		image.save(filename, 0, 100);
+		image.save(filename, "PNG");
 	}
 }
 
@@ -902,8 +902,6 @@ void OpenGLWidget::updateSaveScreenshots(bool value)
 
 void OpenGLWidget::setLogarithmic(bool value)
 {
-	printf("changed setLogarithmic to %i\n", (int)value);
-	
 	logarithmicScale = value;
 
 	if (minimumValue == 0)
