@@ -73,6 +73,7 @@ class MainWidget : public QWidget
 		QAction* exitAction;
 		QAction* openAction;
 		QAction* showDiskAction;
+		QAction* showGridAction;
 		QAction* showPlanetsAction;
 		QAction* showOrbitsAction;
 		QAction* showRocheLobeAction;

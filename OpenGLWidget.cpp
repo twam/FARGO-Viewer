@@ -181,6 +181,7 @@ void OpenGLWidget::setSimulation(Simulation* simulation)
 	this->simulation = simulation;
 
 	initDisk();
+	initGrid();
 	initDiskBorder();
 	initOrbits();
 	initRocheLobe();
@@ -511,6 +512,14 @@ void OpenGLWidget::initDisk()
 	}
 }
 
+void OpenGLWidget::initGrid()
+{
+	if (simulation == NULL)
+		return;
+	
+	// nothing to be done here, as grid is already created by initDisk()
+}
+
 void OpenGLWidget::renderDisk()
 {
 	if (simulation == NULL)
@@ -539,6 +548,27 @@ void OpenGLWidget::renderDisk()
 	glDisableClientState(GL_COLOR_ARRAY);
 
 	glPopMatrix();
+}
+
+void OpenGLWidget::renderGrid()
+{
+	if (simulation == NULL)
+		return;
+
+	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+	glEnable(GL_LINE_SMOOTH);
+	glPushMatrix();
+	glEnableClientState(GL_VERTEX_ARRAY);
+	glEnableClientState(GL_NORMAL_ARRAY);
+	glVertexPointer(3, GL_FLOAT, 0, diskVertices);
+	glNormalPointer(GL_FLOAT, 0, diskNormals);
+	glColor3ub(0x80,0x80,0x80);
+	glDrawElements(GL_QUADS, 4*((simulation->getNRadial())*simulation->getNAzimuthal()), GL_UNSIGNED_INT, diskIndices);
+	glDisableClientState(GL_VERTEX_ARRAY);
+	glDisableClientState(GL_NORMAL_ARRAY);
+	glPopMatrix();
+	glDisable(GL_LINE_SMOOTH);	
+	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 }
 
 void OpenGLWidget::diskColor(GLfloat* color, double value, double minValue, double maxValue, bool logarithmic)
@@ -665,7 +695,6 @@ void OpenGLWidget::renderKey()
 	glOrtho(0,width(),0,height(),-150,150);
 	glMatrixMode(GL_MODELVIEW);
 
-	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
 	glBegin(GL_QUAD_STRIP);
 	unsigned int count = palette->getNumberOfColors();
@@ -800,6 +829,9 @@ void OpenGLWidget::paintGL()
 	if (showDisk)
 		renderDisk();
 
+	if (showGrid)
+		renderGrid();
+
 	if (showOrbits)
 		renderOrbits();
 
@@ -843,6 +875,12 @@ void OpenGLWidget::paintGL()
 void OpenGLWidget::updateShowDisk(bool value)
 {
 	showDisk = value;
+	update();
+}
+
+void OpenGLWidget::updateShowGrid(bool value)
+{
+	showGrid = value;
 	update();
 }
 

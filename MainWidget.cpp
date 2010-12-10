@@ -129,13 +129,19 @@ void MainWidget::createMenu()
 	openGLWidget->updateShowDisk(true);
 	connect(showDiskAction, SIGNAL(toggled(bool)), openGLWidget, SLOT(updateShowDisk(bool)));
 
+	showGridAction = viewMenu->addAction(tr("Show &Grid"));
+	showGridAction->setCheckable(true);
+	showGridAction->setChecked(false);
+	openGLWidget->updateShowGrid(false);
+	connect(showGridAction, SIGNAL(toggled(bool)), openGLWidget, SLOT(updateShowGrid(bool)));
+
 	showDiskBorderAction = viewMenu->addAction(tr("Show disk &border"));
 	showDiskBorderAction->setCheckable(true);
 	showDiskBorderAction->setChecked(false);
 	openGLWidget->updateShowDiskBorder(false);
 	connect(showDiskBorderAction, SIGNAL(toggled(bool)), openGLWidget, SLOT(updateShowDiskBorder(bool)));
 
-	showPlanetsAction = viewMenu -> addAction(tr("Show &Planets"));
+	showPlanetsAction = viewMenu -> addAction(tr("Show &Planets & Star"));
 	showPlanetsAction->setCheckable(true);
 	showPlanetsAction->setChecked(true);
 	openGLWidget->updateShowPlanets(true);

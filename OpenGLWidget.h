@@ -26,6 +26,7 @@ class OpenGLWidget : public QGLWidget
 
 	public slots:
 		void updateShowDisk(bool value);
+		void updateShowGrid(bool value);
 		void updateShowDiskBorder(bool value);
 		void updateShowPlanets(bool value);
 		void updateShowOrbits(bool value);
@@ -62,6 +63,11 @@ class OpenGLWidget : public QGLWidget
 		void initDisk();
 		void renderDisk();
 		void diskColor(GLfloat* color, double value, double minValue, double maxValue, bool logarithmic);
+
+		// grid
+		bool showGrid;
+		void initGrid();
+		void renderGrid();
 
 		// disk border
 		bool showDiskBorder;
