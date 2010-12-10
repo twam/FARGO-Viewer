@@ -18,7 +18,7 @@ MainWidget::MainWidget(QWidget *parent)
 
 	openGLWidget = new OpenGLWidget(this);
 	paletteWidget = new PaletteWidget(openGLWidget->getPalette(),0);
-	connect(paletteWidget, SIGNAL(paletteUpdated()), openGLWidget, SLOT(update()));
+	connect(paletteWidget, SIGNAL(paletteUpdated()), openGLWidget, SLOT(updateFromGrid()));
 
 	createMenu();
 	createButtons();
@@ -409,7 +409,7 @@ void MainWidget::setSimulation(Simulation *simulation)
 		quantityActionGroup->setEnabled(false);
 	} else {
 		connect(simulation, SIGNAL(dataUpdated()), this, SLOT(updateFromSimulation()));
-		connect(simulation, SIGNAL(dataUpdated()), openGLWidget, SLOT(update()));
+		connect(simulation, SIGNAL(dataUpdated()), openGLWidget, SLOT(updateFromGrid()));
 
 		timelineSlider->setEnabled(true);
 		playPauseButton->setEnabled(true);
@@ -483,7 +483,7 @@ void MainWidget::toggledQuantityTemperature(bool value)
 {
 	if (value) {
 		simulation->setQuantityType(Simulation::TEMPERATURE);
-		openGLWidget->update();
+		openGLWidget->updateFromGrid();
 	}
 }
 
@@ -491,7 +491,7 @@ void MainWidget::toggledQuantityDensity(bool value)
 {
 	if (value) {
 		simulation->setQuantityType(Simulation::DENSITY);
-		openGLWidget->update();
+		openGLWidget->updateFromGrid();
 	}
 }
 

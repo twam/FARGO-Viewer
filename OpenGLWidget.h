@@ -36,6 +36,7 @@ class OpenGLWidget : public QGLWidget
 		void updateShowKey(bool value);
 		void updateUseMultisampling(bool value);
 		void updateSaveScreenshots(bool value);
+		void updateFromGrid();
 
 	protected:
 		void initializeGL();
@@ -53,6 +54,8 @@ class OpenGLWidget : public QGLWidget
 		GLdouble cameraRotationX;
 		GLdouble cameraRotationY;
 		GLdouble cameraRotationZ;
+
+		bool gridChanged;
 
 		// disk
 		bool showDisk;

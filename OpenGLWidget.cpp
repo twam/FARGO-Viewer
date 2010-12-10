@@ -143,6 +143,8 @@ OpenGLWidget::OpenGLWidget(QWidget *parent)
 	minimumValue = 10;
 	maximumValue = 1000;
 	logarithmicScale = true;
+
+	gridChanged = true;
 }
 
 OpenGLWidget::~OpenGLWidget()
@@ -527,12 +529,15 @@ void OpenGLWidget::renderDisk()
 
 	unsigned int index;
 
-	// set colors
-	for (unsigned int nRadial = 0; nRadial <= simulation->getNRadial(); ++nRadial) {
-		for (unsigned int nAzimuthal = 0; nAzimuthal < simulation->getNAzimuthal(); ++nAzimuthal) {
-			index =  nRadial * simulation->getNAzimuthal() + nAzimuthal;
-			diskColor(&diskColors[4*index], simulation->getQuantity()[index], minimumValue, maximumValue, logarithmicScale);
+	if (gridChanged) {
+		// set colors
+		for (unsigned int nRadial = 0; nRadial <= simulation->getNRadial(); ++nRadial) {
+			for (unsigned int nAzimuthal = 0; nAzimuthal < simulation->getNAzimuthal(); ++nAzimuthal) {
+				index =  nRadial * simulation->getNAzimuthal() + nAzimuthal;
+				diskColor(&diskColors[4*index], simulation->getQuantity()[index], minimumValue, maximumValue, logarithmicScale);
+			}
 		}
+		gridChanged = false;
 	}
 
 	glPushMatrix();
@@ -945,6 +950,7 @@ void OpenGLWidget::setLogarithmic(bool value)
 	if (minimumValue == 0)
 		minimumValue = DBL_MIN;
 
+	updateFromGrid();
 	update();
 }
 
@@ -955,6 +961,7 @@ void OpenGLWidget::setMinimumValue(double value)
 	if (minimumValue > maximumValue)
 		maximumValue = minimumValue;
 
+	updateFromGrid();
 	update();
 }
 
@@ -965,5 +972,12 @@ void OpenGLWidget::setMaximumValue(double value)
 	if (maximumValue < minimumValue)
 		minimumValue = maximumValue;
 
+	updateFromGrid();
+	update();
+}
+
+void OpenGLWidget::updateFromGrid()
+{
+	gridChanged = true;
 	update();
 }
