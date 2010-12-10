@@ -6,110 +6,7 @@
 #include <float.h>
 #include <QWheelEvent>
 
-typedef struct
-{
-	GLubyte *imageData;
-	GLuint bpp;
-	GLuint width;
-	GLuint height;
-	GLuint textureID;
-} TextureImage;
-
-TextureImage textures[1];
-
-/**
-	loads a TGA file into memory
-*/
-bool loadTGA(TextureImage *texture, const char *filename)
-{
-	// Uncompressed TGA Header
-	GLubyte TGAheader[12]={0,0,2,0,0,0,0,0,0,0,0,0};
-	// Used To Compare TGA Header
-	GLubyte TGAcompare[12];
-	// First 6 Useful Bytes From The Header
-	GLubyte header[6];
-	// Holds Number Of Bytes Per Pixel Used In The TGA File
-	GLuint bytesPerPixel;
-	// Used To Store The Image Size When Setting Aside Ram
-	GLuint imageSize;
-	GLuint temp;
-	// Set The Default GL Mode To RBGA (32 BPP)
-	GLuint type=GL_RGBA;
-
-	FILE *file = fopen(filename, "rb");
-
-	if (file==NULL ||
-		fread(TGAcompare,1,sizeof(TGAcompare),file)!=sizeof(TGAcompare) ||
-		memcmp(TGAheader,TGAcompare,sizeof(TGAheader))!=0 ||
-		fread(header,1,sizeof(header),file)!=sizeof(header)) {
-		if (file == NULL) {
-			return false;
-		} else {
-			fclose(file);
-			return false;
-		}
-	}
-
-	// Determine The TGA Width (highbyte*256+lowbyte)
-	texture->width  = header[1] * 256 + header[0];
-	// Determine The TGA Height (highbyte*256+lowbyte)
-	texture->height = header[3] * 256 + header[2];
-
- 	if (texture->width <=0 || texture->height <=0 || (header[4]!=24 && header[4]!=32)) {
-		fclose(file);
-		return false;
-	}
-
-	// Grab The TGA's Bits Per Pixel (24 or 32)
-	texture->bpp = header[4];
-	// Divide By 8 To Get The Bytes Per Pixel
-	bytesPerPixel = texture->bpp/8;
-	imageSize = texture->width*texture->height*bytesPerPixel;
-
-	// Reserve Memory To Hold The TGA Data
-	texture->imageData=(GLubyte *)malloc(imageSize);
-
-	if(	texture->imageData==NULL ||							// Does The Storage Memory Exist?
-		fread(texture->imageData, 1, imageSize, file)!=imageSize)	// Does The Image Size Match The Memory Reserved?
-	{
-		if(texture->imageData!=NULL)						// Was Image Data Loaded
-			free(texture->imageData);						// If So, Release The Image Data
-
-		fclose(file);										// Close The File
-		return false;										// Return False
-	}
-
-	// Swaps The 1st And 3rd Bytes ('R'ed and 'B'lue)
-	for(GLuint i=0; i < imageSize; i+=bytesPerPixel) {
-		temp=texture->imageData[i];
-		texture->imageData[i] = texture->imageData[i + 2];
-		texture->imageData[i + 2] = temp;
-	}
-
-	fclose (file);
-
-	// generate OpenGL texture ID
-	glGenTextures(1, &texture[0].textureID);
-
-	// bind our textur
-	glBindTexture(GL_TEXTURE_2D, texture[0].textureID);
-	// linear filtered
-	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	// linear filtered
-	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-	// // Was The TGA 24 Bits
-	if (texture[0].bpp==24) {
-		// If So Set The 'type' To GL_RGB
-		type=GL_RGB;
-	}
-
-	glTexImage2D(GL_TEXTURE_2D, 0, type, texture[0].width, texture[0].height, 0, type, GL_UNSIGNED_BYTE, texture[0].imageData);
-	glBindTexture(GL_TEXTURE_2D, 0);
-
-	//Texture Building Went Ok, Return True
-	return true;
-}
+GLuint textures[1];
 
 OpenGLWidget::OpenGLWidget(QWidget *parent)
 : QGLWidget(QGLFormat(QGL::SampleBuffers), parent), simulation(NULL)
@@ -219,8 +116,6 @@ GLboolean checkExtension(const char *extName)
 	return GL_FALSE;
 }
 
-
-
 void OpenGLWidget::initializeGL()
 {
 	supportMultisampling = checkExtension("GL_ARB_multisample");
@@ -255,8 +150,11 @@ void OpenGLWidget::initializeGL()
 	initSky();
 
 	glEnable(GL_TEXTURE_2D);
-	loadTGA(&textures[0],"sun.tga");
+
+	QImage sunGL("sun.tga");
+	textures[0]=bindTexture(sunGL,GL_TEXTURE_2D, GL_RGBA);
 }
+
 
 void OpenGLWidget::resizeGL(int width, int height)
 {
@@ -299,8 +197,22 @@ void OpenGLWidget::mouseMoveEvent(QMouseEvent *event)
 
 void OpenGLWidget::wheelEvent(QWheelEvent *event)
 {
-	cameraPositionZ += (GLdouble)(event->delta()/8)/360.0*20.0;
+	double scroll_factor = 1.0;
+	
+	if (event->modifiers() & Qt::ControlModifier) {
+		scroll_factor = 1.0;
+	} else {
+		scroll_factor = 20.0;
+	}
+
+	cameraPositionZ += (GLdouble)(event->delta()/8)/360.0*scroll_factor;
+	
 	update();
+}
+
+void OpenGLWidget::keyPressEvent(QKeyEvent */*event*/)
+{
+	
 }
 
 void OpenGLWidget::renderPlanets()
@@ -316,7 +228,7 @@ void OpenGLWidget::renderPlanets()
 		glPushMatrix();
 		glTranslated(simulation->getPlanetPosition(i)[0],simulation->getPlanetPosition(i)[1],simulation->getPlanetPosition(i)[2]);
 		GLUquadricObj* quadric = gluNewQuadric();
-		glBindTexture(GL_TEXTURE_2D, textures[0].textureID);
+		glBindTexture(GL_TEXTURE_2D, textures[0]);
 		gluQuadricTexture(quadric,true);
 		glMaterialfv(GL_FRONT, GL_EMISSION, mat_emission);
 		gluSphere(quadric,0.1,32,32);

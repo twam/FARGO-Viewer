@@ -45,6 +45,7 @@ class OpenGLWidget : public QGLWidget
 		void wheelEvent(QWheelEvent *event);
 		void mousePressEvent(QMouseEvent *event);
 		void mouseMoveEvent(QMouseEvent *event);
+		void keyPressEvent(QKeyEvent *event);
 
 	private:
 		QPoint last_drag_pos;
