@@ -1,12 +1,14 @@
 #ifndef _OPENGLWIDGET_H_
 #define _OPENGLWIDGET_H_
 
-#include <QGLWidget>
+#include "OpenGLNavigationWidget.h"
 #include "Simulation.h"
 #include "Palette.h"
 #include "RocheLobe.h"
+#include "Vector.h"
+#include "Matrix.h"
 
-class OpenGLWidget : public QGLWidget
+class OpenGLWidget : public OpenGLNavigationWidget
 {
 	Q_OBJECT
 
@@ -14,7 +16,6 @@ class OpenGLWidget : public QGLWidget
 		OpenGLWidget(QWidget *parent);
 		~OpenGLWidget();
 		void setSimulation(Simulation *simulation);
-		void resetCamera();
 		
 		inline Palette* getPalette() { return palette; }
 		
@@ -42,20 +43,8 @@ class OpenGLWidget : public QGLWidget
 		void initializeGL();
 		void resizeGL(int width, int height);
 		void paintGL();
-		void wheelEvent(QWheelEvent *event);
-		void mousePressEvent(QMouseEvent *event);
-		void mouseMoveEvent(QMouseEvent *event);
-		void keyPressEvent(QKeyEvent *event);
 
 	private:
-		QPoint last_drag_pos;
-		GLdouble cameraPositionX;
-		GLdouble cameraPositionY;
-		GLdouble cameraPositionZ;
-		GLdouble cameraRotationX;
-		GLdouble cameraRotationY;
-		GLdouble cameraRotationZ;
-
 		bool gridChanged;
 
 		// disk

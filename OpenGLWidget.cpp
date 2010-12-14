@@ -9,7 +9,7 @@
 GLuint textures[1];
 
 OpenGLWidget::OpenGLWidget(QWidget *parent)
-: QGLWidget(QGLFormat(QGL::SampleBuffers), parent), simulation(NULL)
+: OpenGLNavigationWidget(QGLFormat(QGL::SampleBuffers), parent), simulation(NULL)
 {
 	diskVertices = NULL;
 	diskNormals = NULL;
@@ -34,6 +34,17 @@ OpenGLWidget::OpenGLWidget(QWidget *parent)
 	palette->addColor(3,QColor(0xFF,0x00,0x00,0xFF));
 	palette->addColor(4,QColor(0xFF,0x80,0x00,0xFF));
 	palette->addColor(5,QColor(0xFF,0xFF,0xFF,0xFF));
+
+	setNormalMoveFactor(0.05);
+	setFastMoveFactor(5*0.05);
+	setNormalRotationFactor(1.0);
+	setFastRotationFactor(5.0);
+	setNormalZoomFactor(1.0);
+	setFastZoomFactor(5.0);
+
+	setCameraDefaultPosition(Vector<GLdouble, 3>(3,0.0,0.0,-50.0));
+	setCameraDefaultLookAt(Vector<GLdouble, 3>(3,0.0,0.0,0.0));
+	setCameraDefaultUp(Vector<GLdouble, 3>(3,0.0,1.0,0.0));
 
 	resetCamera();
 
@@ -62,17 +73,6 @@ OpenGLWidget::~OpenGLWidget()
 	delete [] skyVertices;
 
 	delete palette;
-}
-
-void OpenGLWidget::resetCamera()
-{
-	cameraPositionX = 0.0;
-	cameraPositionY = 0.0;
-	cameraPositionZ = -50.0;
-
-	cameraRotationX =0.0;
-	cameraRotationY = 0.0;
-	cameraRotationZ = 0.0;
 }
 
 void OpenGLWidget::setSimulation(Simulation* simulation)
@@ -153,6 +153,8 @@ void OpenGLWidget::initializeGL()
 
 	QImage sunGL("sun.tga");
 	textures[0]=bindTexture(sunGL,GL_TEXTURE_2D, GL_RGBA);
+	glBindTexture(GL_TEXTURE_2D, 0);
+	
 }
 
 
@@ -165,54 +167,6 @@ void OpenGLWidget::resizeGL(int width, int height)
 	glLoadIdentity();
 	gluPerspective(60.0f, (GLfloat)width/(GLfloat)height, 0.1f, 500.0f);
 	glMatrixMode(GL_MODELVIEW);
-}
-
-void OpenGLWidget::mousePressEvent(QMouseEvent *event)
-{
-	if (event->button() == Qt::LeftButton) {
-		last_drag_pos = event->pos();
-	}
-
-	if (event->button() == Qt::RightButton) {
-		last_drag_pos = event->pos();
-	}
-}
-
-void OpenGLWidget::mouseMoveEvent(QMouseEvent *event)
-{
-	if (event->buttons() & Qt::LeftButton) {
-		cameraPositionX += (GLdouble)(event->pos().x() - last_drag_pos.x()) / 50.0;
-		cameraPositionY -= (GLdouble)(event->pos().y() - last_drag_pos.y()) / 50.0;
-		last_drag_pos = event->pos();
-		update();
-	}
-
-	if (event->buttons() & Qt::RightButton) {
-		cameraRotationY += 2.0 * (event->pos().x() - last_drag_pos.x());
-		cameraRotationX += 2.0 * (event->pos().y() - last_drag_pos.y());
-		last_drag_pos = event->pos();
-		update();
-	}
-}
-
-void OpenGLWidget::wheelEvent(QWheelEvent *event)
-{
-	double scroll_factor = 1.0;
-	
-	if (event->modifiers() & Qt::ControlModifier) {
-		scroll_factor = 1.0;
-	} else {
-		scroll_factor = 20.0;
-	}
-
-	cameraPositionZ += (GLdouble)(event->delta()/8)/360.0*scroll_factor;
-	
-	update();
-}
-
-void OpenGLWidget::keyPressEvent(QKeyEvent */*event*/)
-{
-	
 }
 
 void OpenGLWidget::renderPlanets()
@@ -731,17 +685,14 @@ void OpenGLWidget::paintGL()
 
 	if (showSky) {
 		// do camera rotation without translation, so stars appear with infinity distance
-		glLoadIdentity();
-		glRotated(cameraRotationY, 0.0, 1.0, 0.0);
-		glRotated(cameraRotationX, 1.0, 0.0, 0.0);
-		renderSky();
+		//glLoadIdentity();
+		//glRotated(cameraRotationY, 0.0, 1.0, 0.0);
+		//glRotated(cameraRotationX, 1.0, 0.0, 0.0);
+		//renderSky();
 	}
 
 	// setup camera view
-	glLoadIdentity();
-	glTranslated(cameraPositionX, cameraPositionY, cameraPositionZ);
-	glRotated(cameraRotationY, 0.0, 1.0, 0.0);
-	glRotated(cameraRotationX, 1.0, 0.0, 0.0);
+	setupCamera();
 
 	if (showDisk)
 		renderDisk();
@@ -893,3 +844,4 @@ void OpenGLWidget::updateFromGrid()
 	gridChanged = true;
 	update();
 }
+

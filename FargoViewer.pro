@@ -12,5 +12,5 @@ QMAKE_CXXFLAGS_DEBUG = -march=native -O2 -pipe -g
 QMAKE_CXXFLAGS_RELEASE = -march=native -O2 -pipe -DNDEBUG
 
 # Input
-HEADERS += MainWidget.h OpenGLWidget.h Simulation.h config.h Palette.h PaletteWidget.h ColorWidget.h RocheLobe.h
-SOURCES += main.cpp MainWidget.cpp OpenGLWidget.cpp Simulation.cpp config.cpp Palette.cpp PaletteWidget.cpp ColorWidget.cpp RocheLobe.cpp
+HEADERS += MainWidget.h OpenGLWidget.h Simulation.h config.h Palette.h PaletteWidget.h ColorWidget.h RocheLobe.h Vector.h Matrix.h OpenGLNavigationWidget.h
+SOURCES += main.cpp MainWidget.cpp OpenGLWidget.cpp Simulation.cpp config.cpp Palette.cpp PaletteWidget.cpp ColorWidget.cpp RocheLobe.cpp OpenGLNavigationWidget.cpp
