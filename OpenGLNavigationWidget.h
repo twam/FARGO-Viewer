@@ -38,6 +38,38 @@ class OpenGLNavigationWidget : public QGLWidget
 		OpenGLNavigationWidget(const QGLFormat& format, QWidget* parent = 0, const QGLWidget* shareWidget = 0, Qt::WindowFlags f = 0);
 		~OpenGLNavigationWidget();
 
+		// setter
+		void setCameraDefaultPosition(const Vector<GLdouble, 3> &);
+		void setCameraDefaultLookAt(const Vector<GLdouble, 3> &);
+		void setCameraDefaultUp(const Vector<GLdouble, 3> &);
+		void setCameraPosition(const Vector<GLdouble, 3> &);
+		void setCameraLookAt(const Vector<GLdouble, 3> &);
+		void setCameraUp(const Vector<GLdouble, 3> &);
+		inline void setNormalMoveFactor(double c) { normalMoveFactor = c; }
+		inline void setFastMoveFactor(double c) { fastMoveFactor = c; }
+		inline void setNormalRotationFactor(double c) { normalRotateFactor = c; }
+		inline void setFastRotationFactor(double c) { fastRotateFactor = c; }
+		inline void setNormalZoomFactor(double c) { normalZoomFactor = c; }
+		inline void setFastZoomFactor(double c) { fastZoomFactor = c; }
+
+		// getter
+		inline const Vector<GLdouble ,3>& getCameraDefaultPosition() const { return cameraDefaultPosition; }
+		inline const Vector<GLdouble ,3>& getCameraDefaultLookAt() const { return cameraDefaultLookAt; }
+		inline const Vector<GLdouble ,3>& getCameraDefaultUp() const { return cameraDefaultUp; }
+		inline const Vector<GLdouble ,3>& getCameraPosition() const { return cameraPosition; }
+		inline const Vector<GLdouble ,3>& getCameraLookAt() const { return cameraLookAt; }
+		inline const Vector<GLdouble ,3>& getCameraUp() const { return cameraUp; }
+		inline double getNormalMoveFactor() const { return normalMoveFactor; }
+		inline double getFastMoveFactor() const { return fastMoveFactor; }
+		inline double getNormalRotationFactor() const { return normalRotateFactor; }
+		inline double getFastRotationFactor() const { return fastRotateFactor; }
+		inline double getNormalZoomFactor() const { return normalZoomFactor; }
+		inline double getFastZoomFactor() const { return fastZoomFactor; }
+
+		void updateCameraBasis();
+		void resetCamera();
+		void setupCamera();
+
 	protected:
 		/// position of last mouse drag
 		QPoint lastDragPosition;
@@ -73,38 +105,6 @@ class OpenGLNavigationWidget : public QGLWidget
 		double normalZoomFactor;
 		/// factor for fast zooming (ctrl pressed)
 		double fastZoomFactor;
-
-		// setter
-		void setCameraDefaultPosition(const Vector<GLdouble, 3> &);
-		void setCameraDefaultLookAt(const Vector<GLdouble, 3> &);
-		void setCameraDefaultUp(const Vector<GLdouble, 3> &);
-		void setCameraPosition(const Vector<GLdouble, 3> &);
-		void setCameraLookAt(const Vector<GLdouble, 3> &);
-		void setCameraUp(const Vector<GLdouble, 3> &);
-		inline void setNormalMoveFactor(double c) { normalMoveFactor = c; }
-		inline void setFastMoveFactor(double c) { fastMoveFactor = c; }
-		inline void setNormalRotationFactor(double c) { normalRotateFactor = c; }
-		inline void setFastRotationFactor(double c) { fastRotateFactor = c; }
-		inline void setNormalZoomFactor(double c) { normalZoomFactor = c; }
-		inline void setFastZoomFactor(double c) { fastZoomFactor = c; }
-
-		// getter
-		inline const Vector<GLdouble ,3>& getCameraDefaultPosition() const { return cameraDefaultPosition; }
-		inline const Vector<GLdouble ,3>& getCameraDefaultLookAt() const { return cameraDefaultLookAt; }
-		inline const Vector<GLdouble ,3>& getCameraDefaultUp() const { return cameraDefaultUp; }
-		inline const Vector<GLdouble ,3>& getCameraPosition() const { return cameraPosition; }
-		inline const Vector<GLdouble ,3>& getCameraLookAt() const { return cameraLookAt; }
-		inline const Vector<GLdouble ,3>& getCameraUp() const { return cameraUp; }
-		inline double getNormalMoveFactor() const { return normalMoveFactor; }
-		inline double getFastMoveFactor() const { return fastMoveFactor; }
-		inline double getNormalRotationFactor() const { return normalRotateFactor; }
-		inline double getFastRotationFactor() const { return fastRotateFactor; }
-		inline double getNormalZoomFactor() const { return normalZoomFactor; }
-		inline double getFastZoomFactor() const { return fastZoomFactor; }
-
-		void updateCameraBasis();
-		void resetCamera();
-		void setupCamera();
 
 		virtual void mousePressEvent(QMouseEvent *event);
 		virtual void mouseMoveEvent(QMouseEvent *event);
