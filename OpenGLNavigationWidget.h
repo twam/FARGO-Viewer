@@ -66,7 +66,6 @@ class OpenGLNavigationWidget : public QGLWidget
 		inline double getNormalZoomFactor() const { return normalZoomFactor; }
 		inline double getFastZoomFactor() const { return fastZoomFactor; }
 
-		void updateCameraBasis();
 		void resetCamera();
 		void setupCamera();
 
@@ -108,6 +107,9 @@ class OpenGLNavigationWidget : public QGLWidget
 
 		/// rotation matrix
 		Matrix<GLdouble, 4 , 4> cameraRotationMatrix;
+
+		void updateCameraBasis();
+		void updateCameraRotationMatrix();
 
 		virtual void mousePressEvent(QMouseEvent *event);
 		virtual void mouseMoveEvent(QMouseEvent *event);
