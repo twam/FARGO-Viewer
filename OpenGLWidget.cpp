@@ -536,6 +536,12 @@ void OpenGLWidget::renderSky()
 {
 	glEnable(GL_POINT_SMOOTH);
 
+	glPushMatrix();
+
+	// do camera rotation without translation, so stars appear with infinity distance
+	glLoadIdentity();
+	glMultMatrixd(cameraRotationMatrix);	
+
 	glColor3f(1.0,1.0,1.0);
 	glPointSize(1.0);
 	glBegin(GL_POINTS);
@@ -543,6 +549,8 @@ void OpenGLWidget::renderSky()
 		glVertex3fv(&skyVertices[3*i]);
 	}
 	glEnd();
+
+	glPopMatrix();
 
 	glDisable(GL_POINT_SMOOTH);
 }
@@ -683,16 +691,12 @@ void OpenGLWidget::paintGL()
 	glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
 	glClear(GL_COLOR_BUFFER_BIT);
 
-	if (showSky) {
-		// do camera rotation without translation, so stars appear with infinity distance
-		//glLoadIdentity();
-		//glRotated(cameraRotationY, 0.0, 1.0, 0.0);
-		//glRotated(cameraRotationX, 1.0, 0.0, 0.0);
-		//renderSky();
-	}
-
 	// setup camera view
 	setupCamera();
+
+	if (showSky) {
+		renderSky();
+	}
 
 	if (showDisk)
 		renderDisk();

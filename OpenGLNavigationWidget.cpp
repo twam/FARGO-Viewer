@@ -139,29 +139,27 @@ void OpenGLNavigationWidget::setupCamera()
 {
 	glLoadIdentity();
 
-	Matrix<GLdouble, 4, 4> matrix;
+	cameraRotationMatrix(0,0) = cameraSide(0);
+	cameraRotationMatrix(1,0) = cameraSide(1);
+	cameraRotationMatrix(2,0) = cameraSide(2);
+	cameraRotationMatrix(3,0) = 0.0;
 
-	matrix(0,0) = cameraSide(0);
-	matrix(1,0) = cameraSide(1);
-	matrix(2,0) = cameraSide(2);
-	matrix(3,0) = 0.0;
+	cameraRotationMatrix(0,1) = cameraUp(0);
+	cameraRotationMatrix(1,1) = cameraUp(1);
+	cameraRotationMatrix(2,1) = cameraUp(2);
+	cameraRotationMatrix(3,1) = 0.0;
 
-	matrix(0,1) = cameraUp(0);
-	matrix(1,1) = cameraUp(1);
-	matrix(2,1) = cameraUp(2);
-	matrix(3,1) = 0.0;
+	cameraRotationMatrix(0,2) = -(cameraForward[0]);
+	cameraRotationMatrix(1,2) = -(cameraForward[1]);
+	cameraRotationMatrix(2,2) = -(cameraForward[2]);
+	cameraRotationMatrix(3,2) = 0.0;
 
-	matrix(0,2) = -(cameraForward[0]);
-	matrix(1,2) = -(cameraForward[1]);
-	matrix(2,2) = -(cameraForward[2]);
-	matrix(3,2) = 0.0;
+	cameraRotationMatrix(0,3) = 0.0;
+	cameraRotationMatrix(1,3) = 0.0;
+	cameraRotationMatrix(2,3)= 0.0;
+	cameraRotationMatrix(3,3) = 1.0;
 
-	matrix(0,3) = 0.0;
-	matrix(1,3) = 0.0;
-	matrix(2,3)= 0.0;
-	matrix(3,3) = 1.0;
-
-	glMultMatrixd(matrix);
+	glMultMatrixd(cameraRotationMatrix);
 	glTranslated(-cameraPosition(0), -cameraPosition(1), -cameraPosition(2));
 }
 
