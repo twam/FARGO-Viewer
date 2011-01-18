@@ -574,7 +574,6 @@ void OpenGLWidget::renderKey()
 	glOrtho(0,width(),0,height(),-150,150);
 	glMatrixMode(GL_MODELVIEW);
 
-
 	glBegin(GL_QUAD_STRIP);
 	unsigned int count = palette->getNumberOfColors();
 	unsigned int value;
@@ -603,25 +602,10 @@ void OpenGLWidget::renderKey()
 		int a,b, a_max, b_max;
 		double pos;
 
-		if (minimumValue>=1) {
-			a = trunc(log10(minimumValue));
-			b = trunc(minimumValue/pow(10,a));
-		} else {
-			a = trunc(log10(minimumValue)-1);
-			b = trunc(minimumValue/pow(10,a));
-		}
-
-		if (maximumValue>=1) {
-			a_max = trunc(log10(maximumValue));
-			b_max = trunc(maximumValue/pow(10,a_max));
-			if (b_max == 10) {
-				a_max++;
-				b_max = 1;
-			}
-		} else {
-			a_max = trunc(log10(maximumValue)-1);
-			b_max = trunc(maximumValue/pow(10,a_max));			
-		}
+		a = floor(log10(minimumValue));
+		b = floor(minimumValue/pow(10.0,a));
+		a_max = floor(log10(maximumValue));
+		b_max = floor(maximumValue/pow(10.0,a_max));
 
 		while ((a<a_max) || ((a==a_max) && (b<=b_max))) {
 			//printf("a: %i/%i b: %i/%i\n",a,a_max,b,b_max);
@@ -642,6 +626,7 @@ void OpenGLWidget::renderKey()
 				a++;
 			}
 		}
+
 	} else {
 		unsigned int maxTics = trunc(keyHeight/(2.0*fontSize));
 
@@ -694,9 +679,8 @@ void OpenGLWidget::paintGL()
 	// setup camera view
 	setupCamera();
 
-	if (showSky) {
+	if (showSky)
 		renderSky();
-	}
 
 	if (showDisk)
 		renderDisk();
