@@ -179,9 +179,13 @@ int Simulation::loadFromFile(const char* filename)
 int Simulation::loadTimestep(unsigned int timestep)
 {
 	// TODO: On errors, memory leakage occurs!
+	int ret = 0;
 
 	FILE *fd;
 	char *filename;
+
+	double* newPlanetPositions = (double*)malloc(NPlanets*3*sizeof(double));
+	double* newPlanetVelocities = (double*)malloc(NPlanets*3*sizeof(double));
 
 	for (unsigned int i = 1; i < NPlanets; ++i) {
 		filename = new char[strlen(outputDirectory)+1+10+(unsigned int)(log(NPlanets)/log(10)+1)];
@@ -202,8 +206,8 @@ int Simulation::loadTimestep(unsigned int timestep)
 		}
 		
 		unsigned int timestepFile;
-		sscanf(buffer, "%u %lf %lf %lf %lf", &timestepFile, &planetPositions[i*3+0], &planetPositions[i*3+1], &planetVelocities[i*3+0], &planetVelocities[i*3+1]);
-		
+		sscanf(buffer, "%u %lf %lf %lf %lf", &timestepFile, &newPlanetPositions[i*3+0], &newPlanetPositions[i*3+1], &newPlanetVelocities[i*3+0], &newPlanetVelocities[i*3+1]);
+
 		if (timestepFile != timestep) {
 			fprintf(stderr, "Timestep does not matched with file: %u != %u\n", timestep, timestepFile);
 			fprintf(stderr, "Line was '%s'\n",buffer);
@@ -219,23 +223,36 @@ int Simulation::loadTimestep(unsigned int timestep)
 		case DENSITY:
 			filename = new char[strlen(outputDirectory)+1+12+(unsigned int)(log(timestep)/log(10)+1)];
 			sprintf(filename, "%sgasdens%u.dat", outputDirectory, timestep);
-			loadGrid(quantity, filename, true);
+			ret = loadGrid(quantity, filename, true);
 			break;
 
 		case TEMPERATURE:
 			filename = new char[strlen(outputDirectory)+1+19+(unsigned int)(log(timestep)/log(10)+1)];
 			sprintf(filename, "%sgasTemperature%u.dat", outputDirectory, timestep);
-			loadGrid(quantity, filename, true);
+			ret = loadGrid(quantity, filename, true);
 			break;
 		default:
 			break;
 	}
 
-	currentTimestep = timestep;
+	if (ret == 0) {
+		double* temp;
 
-	emit dataUpdated();
+		// copy planet positions
+		temp = planetPositions;
+		planetPositions = newPlanetPositions;
+		free(temp);
 
-	return 0;
+		temp = planetVelocities;
+		planetVelocities = newPlanetVelocities;
+		free(temp);
+	
+		currentTimestep = timestep;
+
+		emit dataUpdated();
+	}
+
+	return ret;
 }
 
 /**
@@ -245,12 +262,12 @@ int Simulation::loadTimestep(unsigned int timestep)
 	\param filename filename to read
 	\param scalar is this a scalar or vector grid
 */
-void Simulation::loadGrid(double* dest, const char* filename, bool scalar)
+int Simulation::loadGrid(double* dest, const char* filename, bool scalar)
 {
 	FILE *fd = fopen(filename, "rb");
 	if (fd == NULL) {
 		fprintf(stderr, "Could not open '%s'!\n", filename);
-		return;
+		return -1;
 	}
 
 	double* buffer = new double[(scalar ? NRadial : NRadial + 1)*NAzimuthal];
@@ -293,6 +310,8 @@ void Simulation::loadGrid(double* dest, const char* filename, bool scalar)
 loadGrid_cleanUp:
 	delete [] buffer;
 	fclose(fd);
+
+	return 0;
 }
 
 void Simulation::setQuantityType(QuantityType type)

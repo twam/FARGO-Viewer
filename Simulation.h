@@ -52,7 +52,7 @@ class Simulation : public QObject
 		double* radii;
 		double* quantity;
 
-		void loadGrid(double* dest, const char* filename, bool scalar);
+		int loadGrid(double* dest, const char* filename, bool scalar);
 
 	signals:
 		void dataUpdated();
