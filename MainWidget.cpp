@@ -123,6 +123,9 @@ void MainWidget::createMenu()
 	viewMenu = new QMenu(tr("&View"), this);
 	viewMenu->addMenu(quantityMenu);
 
+	resetCameraAction = viewMenu->addAction(tr("&Reset Camera"));
+	connect(resetCameraAction, SIGNAL(triggered()), this, SLOT(triggeredResetCamera()));
+	
 	showDiskAction = viewMenu->addAction(tr("Show &Disk"));
 	showDiskAction->setCheckable(true);
 	showDiskAction->setChecked(true);
@@ -520,4 +523,9 @@ void MainWidget::triggeredSetMaximumValue()
 		settings->setValue("maximumValue", value);
 		openGLWidget->setMaximumValue(value);
 	}
+}
+
+void MainWidget::triggeredResetCamera()
+{
+	openGLWidget->resetCamera();
 }

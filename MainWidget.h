@@ -59,6 +59,7 @@ class MainWidget : public QWidget
 		void toogledSetLogarithmic(bool value);
 		void triggeredSetMinimumValue();
 		void triggeredSetMaximumValue();
+		void triggeredResetCamera();
 
 	private:
 		void createMenu();
@@ -72,6 +73,7 @@ class MainWidget : public QWidget
 		QActionGroup* quantityActionGroup;
 		QAction* exitAction;
 		QAction* openAction;
+		QAction* resetCameraAction;
 		QAction* showDiskAction;
 		QAction* showGridAction;
 		QAction* showPlanetsAction;
