@@ -45,6 +45,12 @@ MainWidget::MainWidget(QWidget *parent)
 	// restore settings
 	openGLWidget->setMinimumValue(settings->value("minimumValue",10).toDouble());
 	openGLWidget->setMaximumValue(settings->value("maximumValue",1000).toDouble());
+
+	// restore window settings
+	resize(settings->value("MainWindow/Size",QSize(640,480)).toSize());
+	move(settings->value("MainWindow/Position", QPoint(0,0)).toPoint());
+	setWindowState((Qt::WindowStates)(settings->value("MainWindow/WindowState", 0).toInt()));
+
 }
 
 MainWidget::~MainWidget()
@@ -55,6 +61,10 @@ MainWidget::~MainWidget()
 
 void MainWidget::closeEvent(QCloseEvent* /*event*/)
 {
+	settings->setValue("MainWindow/Size", size());
+	settings->setValue("MainWindow/Position", pos());
+	settings->setValue("MainWindow/WindowState", (int)windowState());
+
 	paletteWidget->close();
 }
 
