@@ -12,6 +12,8 @@ class Simulation : public QObject
 		enum QuantityType {
 			DENSITY,
 			TEMPERATURE,
+			VRAD,
+			VTHETA,
 			N_QUANTITY_TYPES
 		};
 

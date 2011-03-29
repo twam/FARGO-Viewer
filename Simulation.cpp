@@ -231,6 +231,19 @@ int Simulation::loadTimestep(unsigned int timestep)
 			sprintf(filename, "%sgasTemperature%u.dat", outputDirectory, timestep);
 			ret = loadGrid(quantity, filename, true);
 			break;
+
+		case VRAD:
+			filename = new char[strlen(outputDirectory)+1+19+(unsigned int)(log(timestep)/log(10)+1)];
+			sprintf(filename, "%sgasvrad%u.dat", outputDirectory, timestep);
+			ret = loadGrid(quantity, filename, true);
+			break;
+
+		case VTHETA:
+			filename = new char[strlen(outputDirectory)+1+19+(unsigned int)(log(timestep)/log(10)+1)];
+			sprintf(filename, "%sgasvtheta%u.dat", outputDirectory, timestep);
+			ret = loadGrid(quantity, filename, true);
+			break;
+
 		default:
 			break;
 	}
