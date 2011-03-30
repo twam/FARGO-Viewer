@@ -56,8 +56,8 @@ class MainWidget : public QWidget
 		void timestepUpdate();
 		void toggledQuantityTemperature(bool value);
 		void toggledQuantityDensity(bool value);
-		void toggledQuantityVrad(bool value);
-		void toggledQuantityVtheta(bool value);
+		void toggledQuantityVRadial(bool value);
+		void toggledQuantityVAzimuthal(bool value);
 		void toogledSetLogarithmic(bool value);
 		void triggeredSetMinimumValue();
 		void triggeredSetMaximumValue();
@@ -94,8 +94,8 @@ class MainWidget : public QWidget
 		QAction* editPaletteAction;
 		QAction* quantityDensityAction;
 		QAction* quantityTemperatureAction;
-		QAction* quantityVradAction;
-		QAction* quantityVthetaAction;
+		QAction* quantityVRadialAction;
+		QAction* quantityVAzimuthalAction;
 		
 		QToolButton* playPauseButton;
 		QToolButton* stopButton;

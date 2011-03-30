@@ -127,13 +127,13 @@ void MainWidget::createMenu()
 	quantityTemperatureAction->setCheckable(true);
 	connect(quantityTemperatureAction, SIGNAL(toggled(bool)), this, SLOT(toggledQuantityTemperature(bool)));
 
-	quantityVradAction = quantityActionGroup->addAction(tr("&Vrad"));
-	quantityVradAction->setCheckable(true);
-	connect(quantityVradAction, SIGNAL(toggled(bool)), this, SLOT(toggledQuantityVrad(bool)));
+	quantityVRadialAction = quantityActionGroup->addAction(tr("&VRadial"));
+	quantityVRadialAction->setCheckable(true);
+	connect(quantityVRadialAction, SIGNAL(toggled(bool)), this, SLOT(toggledQuantityVRadial(bool)));
 
-	quantityVthetaAction = quantityActionGroup->addAction(tr("&Vtheta"));
-	quantityVthetaAction->setCheckable(true);
-	connect(quantityVthetaAction, SIGNAL(toggled(bool)), this, SLOT(toggledQuantityVtheta(bool)));
+	quantityVAzimuthalAction = quantityActionGroup->addAction(tr("&VAzimuthal"));
+	quantityVAzimuthalAction->setCheckable(true);
+	connect(quantityVAzimuthalAction, SIGNAL(toggled(bool)), this, SLOT(toggledQuantityVAzimuthal(bool)));
 
 	quantityMenu->addActions(quantityActionGroup->actions());
 
@@ -516,18 +516,18 @@ void MainWidget::toggledQuantityDensity(bool value)
 	}
 }
 
-void MainWidget::toggledQuantityVrad(bool value)
+void MainWidget::toggledQuantityVRadial(bool value)
 {
 	if (value) {
-		simulation->setQuantityType(Simulation::VRAD);
+		simulation->setQuantityType(Simulation::V_RADIAL);
 		openGLWidget->updateFromGrid();
 	}
 }
 
-void MainWidget::toggledQuantityVtheta(bool value)
+void MainWidget::toggledQuantityVAzimuthal(bool value)
 {
 	if (value) {
-		simulation->setQuantityType(Simulation::VTHETA);
+		simulation->setQuantityType(Simulation::V_AZIMUTHAL);
 		openGLWidget->updateFromGrid();
 	}
 }
