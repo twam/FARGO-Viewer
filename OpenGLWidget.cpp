@@ -87,6 +87,7 @@ void OpenGLWidget::setSimulation(Simulation* simulation)
 
 	resetCamera();
 
+	gridChanged = true;
 	update();
 }
 
