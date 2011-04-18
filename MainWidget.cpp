@@ -2,6 +2,7 @@
 
 #include <QStyle>
 #include <QIntValidator>
+#include <QMessageBox>
 #include <QFileDialog>
 #include <QInputDialog>
 #include <float.h>
@@ -467,9 +468,14 @@ void MainWidget::triggeredOpen()
 		delete simulation;
 		setSimulation(NULL);
 		simulation = new Simulation;
-		simulation->loadFromFile(filename.toAscii().data());
-		setSimulation(simulation);
-		settings->setValue("lastSimulation", filename);
+		if (simulation->loadFromFile(filename.toAscii().data()) == 0) {
+			setSimulation(simulation);
+			settings->setValue("lastSimulation", filename);
+		} else {
+			QMessageBox msgBox;
+			msgBox.setText(QString("Failed to open '%1'.").arg(filename));
+			msgBox.exec();
+		}
 	}
 }
 
