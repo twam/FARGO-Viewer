@@ -65,6 +65,49 @@ MainWidget::MainWidget(QWidget *parent)
 			}
 			i++;
 		}
+
+		if ((args[i] == "-a") || (args[i] == "--autoscale")) {
+			triggeredAutoscale();
+		}
+
+		if ((args[i] == "-q") || (args[i] == "--quantity")) {
+			if (args.count() > i+1) {
+				if (args[i+1] == "density") {
+					quantityDensityAction->toggle();
+				} else if (args[i+1] == "temperature") {
+					quantityTemperatureAction->toggle();
+				} else if (args[i+1] == "vradial") {
+					quantityVRadialAction->toggle();
+				} else if (args[i+1] == "vazimuthal") {
+					quantityVAzimuthalAction->toggle();
+				} else {
+					fprintf(stderr, "Invalid quantity: '%s'!\n", args[i+1].toAscii().constData());
+				}
+			} else {
+				fprintf(stderr, "Please provide quantity to open!\n");
+			}
+			i++;
+		}
+
+		if ((args[i] == "-l") || (args[i] == "--logarithmic")) {
+			setLogarithmicAction->setChecked(true);
+		}
+
+		if ((args[i] == "-i") || (args[i] == "--linear")) {
+			setLogarithmicAction->setChecked(false);
+		}
+
+
+		if ((args[i] == "-h") || (args[i] == "--help")) {
+			printf("Run with %s <options> where options are:\n\n",args[0].toAscii().constData());
+			printf("  -s | --simulation <filename>     open simulation file\n");
+			printf("  -a | --autoscale                 autoscale\n");
+			printf("  -l | --logarithmic               logarithmic scale\n");
+			printf("  -i | --linear                    linear scale\n");
+			printf("  -q | --quantity <quantity>       select quantity (density, temperature, vradial, vazimuthal)\n");
+			printf("\nAll arguments are executed in the order given in the command line,\n");
+			printf("so e.g. it is a good idea to autoscale (-a) after loading a simulation file (-s)\n");
+		}
 	}
 
 }
