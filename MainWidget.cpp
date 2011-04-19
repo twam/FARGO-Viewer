@@ -1,5 +1,6 @@
 #include "MainWidget.h"
 
+#include <QApplication>
 #include <QStyle>
 #include <QIntValidator>
 #include <QMessageBox>
@@ -51,6 +52,20 @@ MainWidget::MainWidget(QWidget *parent)
 	resize(settings->value("MainWindow/Size",QSize(640,480)).toSize());
 	move(settings->value("MainWindow/Position", QPoint(0,0)).toPoint());
 	setWindowState((Qt::WindowStates)(settings->value("MainWindow/WindowState", 0).toInt()));
+
+	// parse arguments
+	QStringList args = QCoreApplication::arguments();
+
+	for (int i = 1; i < args.count(); ++i) {
+		if ((args[i] == "-s") || (args[i] == "--simulation")) {
+			if (args.count() > i+1) {
+				loadSimulation(args[i+1]);
+			} else {
+				fprintf(stderr, "Please provide filename to open!\n");
+			}
+			i++;
+		}
+	}
 
 }
 
@@ -463,7 +478,11 @@ void MainWidget::triggeredExit()
 void MainWidget::triggeredOpen()
 {
 	QString filename = QFileDialog::getOpenFileName(this, tr("Open Simulation"), settings->value("lastSimulation").toString());
+	loadSimulation(filename);
+}
 
+void MainWidget::loadSimulation(QString filename) 
+{
 	if (filename.isNull()) {
 		delete simulation;
 		simulation = NULL;
@@ -479,7 +498,7 @@ void MainWidget::triggeredOpen()
 			msgBox.setText(QString("Failed to open '%1'.").arg(filename));
 			msgBox.exec();
 		}
-	}
+	}	
 }
 
 void MainWidget::changedTimeline(int value)

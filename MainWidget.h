@@ -15,6 +15,7 @@
 #include <QLineEdit>
 #include <QSlider>
 #include <QTimer>
+#include <QString>
 
 #include "OpenGLWidget.h"
 #include "PaletteWidget.h"
@@ -28,6 +29,7 @@ class MainWidget : public QWidget
 		MainWidget(QWidget* parent = 0);
 		~MainWidget();
 		void setSimulation(Simulation* simulation);
+		void loadSimulation(QString filename);
 
 		OpenGLWidget* openGLWidget;
 		PaletteWidget* paletteWidget;
