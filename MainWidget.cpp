@@ -605,8 +605,14 @@ void MainWidget::toggledQuantityVAzimuthal(bool value)
 
 void MainWidget::toogledSetLogarithmic(bool value)
 {
-	openGLWidget->setLogarithmic(value);
-	settings->setValue("logarithmic", value);
+	if ((value) && ((openGLWidget->getMinimumValue() <= 0) || (openGLWidget->getMaximumValue() <= 0))) {
+		QMessageBox msgBox;
+		msgBox.setText(QString("Minimum value and maximum value must be positive for logarithmic scale!"));
+		msgBox.exec();
+	} else {
+		openGLWidget->setLogarithmic(value);
+		settings->setValue("logarithmic", value);
+	}
 }
 
 void MainWidget::triggeredSetMinimumValue()
@@ -614,8 +620,18 @@ void MainWidget::triggeredSetMinimumValue()
 	bool ok;
 	double value = QInputDialog::getDouble(this, tr("Minimum Value"), tr("Minimum Value:"), openGLWidget->getMinimumValue(), -DBL_MAX, DBL_MAX, 10, &ok);
 	if (ok) {
-		openGLWidget->setMinimumValue(value);
-		settings->setValue("minimumValue", openGLWidget->getMinimumValue());
+		if ((openGLWidget->getLogarithmic()) && (value < 0)) {
+			QMessageBox msgBox;
+			msgBox.setText(QString("Minimum value must be positive for logarithmic scale!"));
+			msgBox.exec();
+		} else if (value > openGLWidget->getMaximumValue()) {
+			QMessageBox msgBox;
+			msgBox.setText(QString("Minimum value must smaller than maximum value!"));
+			msgBox.exec();			
+		} else {
+			openGLWidget->setMinimumValue(value);
+			settings->setValue("minimumValue", openGLWidget->getMinimumValue());
+		}
 	}
 }
 
@@ -625,8 +641,18 @@ void MainWidget::triggeredSetMaximumValue()
 	double value = QInputDialog::getDouble(this, tr("Maximum Value"), tr("Maximum Value:"), openGLWidget->getMaximumValue(), -DBL_MAX, DBL_MAX, 10, &ok);
 
 	if (ok) {
-		openGLWidget->setMaximumValue(value);
-		settings->setValue("maximumValue", openGLWidget->getMaximumValue());
+		if ((openGLWidget->getLogarithmic()) && (value < 0)) {
+			QMessageBox msgBox;
+			msgBox.setText(QString("Minimum value must be positive for logarithmic scale!"));
+			msgBox.exec();
+		} else if (value < openGLWidget->getMinimumValue()) {
+			QMessageBox msgBox;
+			msgBox.setText(QString("Minimum value must greater than maximum value!"));
+			msgBox.exec();			
+		} else {
+			openGLWidget->setMaximumValue(value);
+			settings->setValue("maximumValue", openGLWidget->getMaximumValue());
+		}
 	}
 }
 

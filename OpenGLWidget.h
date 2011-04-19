@@ -20,6 +20,7 @@ class OpenGLWidget : public OpenGLNavigationWidget
 		inline Palette* getPalette() { return palette; }
 		
 		void setLogarithmic(bool value);
+		inline bool getLogarithmic() const { return logarithmicScale; }
 		void setMinimumValue(double value);
 		void setMaximumValue(double value);
 		inline double getMinimumValue() const { return minimumValue; }
