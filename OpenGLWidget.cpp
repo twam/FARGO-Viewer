@@ -560,7 +560,12 @@ void OpenGLWidget::renderSky()
 
 void OpenGLWidget::renderKey()
 {
-	const GLfloat marginRight = 40;
+	GLfloat marginRight;
+	if (logarithmicScale) {
+		marginRight = 45;
+	} else {
+		marginRight = 70;
+	}
 	const GLfloat marginTop = 35;
 	const unsigned int fontSize = 10;
 	const GLfloat keyWidth = 20.0;
@@ -626,8 +631,8 @@ void OpenGLWidget::renderKey()
 			glEnd();
 
 			if (b==1) {
-				renderText(width()-marginRight+6.0, marginTop+(double)fontSize/2.0+keyHeight*pos, QString("10"),fontNormal);
-				renderText(width()-marginRight+6.0+fontMetricsNormal.width("10")+1, marginTop-(double)fontSize/2.0+(double)fontSize/2.0+keyHeight*pos, QString("%1").arg(a),fontScript);
+				renderText(width()-marginRight+7.0, marginTop+(double)fontSize/2.0+keyHeight*pos, QString("10"),fontNormal);
+				renderText(width()-marginRight+7.0+fontMetricsNormal.width("10")+1, marginTop-(double)fontSize/2.0+(double)fontSize/2.0+keyHeight*pos, QString("%1").arg(a),fontScript);
 			}
 			
 			b++;
@@ -662,7 +667,15 @@ void OpenGLWidget::renderKey()
 			glVertex2f(width()-marginRight+0.0, height()-marginTop-(keyHeight*(GLfloat)pos/(GLfloat)maxTics));
 			glEnd();
 
-			renderText(width()-marginRight+6.0, marginTop+(double)fontSize/2.0+keyHeight*(GLfloat)pos/(GLfloat)maxTics, QString("%1").arg((float)(maxTics-pos)/(float)(maxTics)*(maximumValue-minimumValue)+minimumValue),fontNormal);
+			double value = (float)(maxTics-pos)/(float)(maxTics)*(maximumValue-minimumValue)+minimumValue;
+			int a = trunc(log10(fabs(value)));
+			double b = value/pow(10.0,a);
+			
+			QString bStr = QString("%1\x95" "10").arg(b,0,'f',1);
+			QString aStr = QString("%1").arg(a);
+			
+			renderText(width()-marginRight+7.0, marginTop+(double)fontSize/2.0+keyHeight*(GLfloat)pos/(GLfloat)maxTics, bStr ,fontNormal);
+			renderText(width()-marginRight+7.0+fontMetricsNormal.width(bStr)+1, marginTop-(double)fontSize/2.0+(double)fontSize/2.0+keyHeight*(GLfloat)pos/(GLfloat)maxTics, aStr ,fontScript);
 		}
 	}
 
