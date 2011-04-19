@@ -668,14 +668,19 @@ void OpenGLWidget::renderKey()
 			glEnd();
 
 			double value = (float)(maxTics-pos)/(float)(maxTics)*(maximumValue-minimumValue)+minimumValue;
+			
 			int a = trunc(log10(fabs(value)));
 			double b = value/pow(10.0,a);
-			
+
 			QString bStr = QString("%1\x95" "10").arg(b,0,'f',1);
 			QString aStr = QString("%1").arg(a);
 			
-			renderText(width()-marginRight+7.0, marginTop+(double)fontSize/2.0+keyHeight*(GLfloat)pos/(GLfloat)maxTics, bStr ,fontNormal);
-			renderText(width()-marginRight+7.0+fontMetricsNormal.width(bStr)+1, marginTop-(double)fontSize/2.0+(double)fontSize/2.0+keyHeight*(GLfloat)pos/(GLfloat)maxTics, aStr ,fontScript);
+			if (value != 0) {
+				renderText(width()-marginRight+7.0, marginTop+(double)fontSize/2.0+keyHeight*(GLfloat)pos/(GLfloat)maxTics, bStr ,fontNormal);
+				renderText(width()-marginRight+7.0+fontMetricsNormal.width(bStr)+1, marginTop-(double)fontSize/2.0+(double)fontSize/2.0+keyHeight*(GLfloat)pos/(GLfloat)maxTics, aStr ,fontScript);
+			} else {
+				renderText(width()-marginRight+7.0, marginTop+(double)fontSize/2.0+keyHeight*(GLfloat)pos/(GLfloat)maxTics, QString("0") ,fontNormal);				
+			}
 		}
 	}
 
