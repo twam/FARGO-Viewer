@@ -606,12 +606,19 @@ void OpenGLWidget::renderKey()
 		double pos;
 
 		a = floor(log10(minimumValue));
-		b = floor(minimumValue/pow(10.0,a));
+		b = floor(minimumValue/pow(10.0,a))+1;
+		if (b == 10) {
+				a++;
+				b = 0;
+		}
+
 		a_max = floor(log10(maximumValue));
 		b_max = floor(maximumValue/pow(10.0,a_max));
 
+		//printf("min: %lg a: %i b: %i i b*10^a = %lg\n", minimumValue, a, b, b*pow(10,a));
+		//printf("max: %lg a: %i b: %i i b*10^a = %lg\n", maximumValue, a_max, b_max, b_max*pow(10,a_max));
+
 		while ((a<a_max) || ((a==a_max) && (b<=b_max))) {
-			//printf("a: %i/%i b: %i/%i\n",a,a_max,b,b_max);
 			glBegin(GL_LINE_STRIP);
 			pos = (1-((double)a+log10((double)b)-log10(minimumValue))/(log10(maximumValue)-log10(minimumValue)));
 			glVertex2f(width()-marginRight+3.0, height()-marginTop-pos*keyHeight);
