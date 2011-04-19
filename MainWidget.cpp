@@ -111,6 +111,9 @@ void MainWidget::createMenu()
 	setMaximumValueAction = optionsMenu->addAction(tr("Set Ma&ximum Value"));
 	connect(setMaximumValueAction, SIGNAL(triggered()), this, SLOT(triggeredSetMaximumValue()));
 
+	autoscaleAction = optionsMenu->addAction(tr("&Autoscale"));
+	connect(autoscaleAction, SIGNAL(triggered()), this, SLOT(triggeredAutoscale()));
+	
 	menuBar->addMenu(optionsMenu);
 
 	// quantity
@@ -549,8 +552,8 @@ void MainWidget::triggeredSetMinimumValue()
 	bool ok;
 	double value = QInputDialog::getDouble(this, tr("Minimum Value"), tr("Minimum Value:"), openGLWidget->getMinimumValue(), -DBL_MAX, DBL_MAX, 10, &ok);
 	if (ok) {
-		settings->setValue("minimumValue", value);
 		openGLWidget->setMinimumValue(value);
+		settings->setValue("minimumValue", openGLWidget->getMinimumValue());
 	}
 }
 
@@ -560,9 +563,26 @@ void MainWidget::triggeredSetMaximumValue()
 	double value = QInputDialog::getDouble(this, tr("Maximum Value"), tr("Maximum Value:"), openGLWidget->getMaximumValue(), -DBL_MAX, DBL_MAX, 10, &ok);
 
 	if (ok) {
-		settings->setValue("maximumValue", value);
 		openGLWidget->setMaximumValue(value);
+		settings->setValue("maximumValue", openGLWidget->getMaximumValue());
 	}
+}
+
+void MainWidget::triggeredAutoscale()
+{
+	double maximum = simulation->getMaximumValue();
+	double minimum = simulation->getMinimumValue();
+
+	if (maximum > openGLWidget->getMinimumValue()) {
+		openGLWidget->setMaximumValue(maximum);
+		openGLWidget->setMinimumValue(minimum);
+	} else {
+		openGLWidget->setMinimumValue(minimum);
+		openGLWidget->setMaximumValue(maximum);
+	}
+
+	settings->setValue("minimumValue", openGLWidget->getMinimumValue());
+	settings->setValue("maximumValue", openGLWidget->getMaximumValue());
 }
 
 void MainWidget::triggeredResetCamera()

@@ -35,6 +35,9 @@ class Simulation : public QObject
 		inline const double* getQuantity() const { return quantity; }
 		void setQuantityType(QuantityType type);
 
+		double getMinimumValue(void);
+		double getMaximumValue(void);
+
 	private:
 		QuantityType quantityType;
 		bool readGhostCells;

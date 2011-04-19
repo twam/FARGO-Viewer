@@ -61,6 +61,7 @@ class MainWidget : public QWidget
 		void toogledSetLogarithmic(bool value);
 		void triggeredSetMinimumValue();
 		void triggeredSetMaximumValue();
+		void triggeredAutoscale();
 		void triggeredResetCamera();
 
 	private:
@@ -91,6 +92,7 @@ class MainWidget : public QWidget
 		QAction* setLogarithmicAction;
 		QAction* setMinimumValueAction;
 		QAction* setMaximumValueAction;
+		QAction* autoscaleAction;
 		QAction* editPaletteAction;
 		QAction* quantityDensityAction;
 		QAction* quantityTemperatureAction;

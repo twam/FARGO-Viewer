@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
+#include <float.h>
 
 Simulation::Simulation()
 {
@@ -13,6 +14,7 @@ Simulation::Simulation()
 	NPlanets = 0;
 	readGhostCells = false;
 	quantityType = DENSITY;
+	quantity = NULL;
 }
 
 Simulation::~Simulation()
@@ -26,7 +28,8 @@ Simulation::~Simulation()
 	free(planetMasses);
 
 	delete [] radii;
-	delete [] quantity;
+	if (quantity != NULL) 
+		delete [] quantity;
 }
 
 int Simulation::loadFromFile(const char* filename)
@@ -96,7 +99,7 @@ int Simulation::loadFromFile(const char* filename)
 		sscanf(buffer, "%lf", &radii[i]);
 	}
 
-	quantity = new double[(NRadial+1)*NAzimuthal];
+	quantity = new double[(NRadial + 1)*NAzimuthal];
 
 	// load planets
 	NPlanets = 1;
@@ -327,10 +330,38 @@ loadGrid_cleanUp:
 	return 0;
 }
 
-void Simulation::setQuantityType(QuantityType type)
-{
+void Simulation::setQuantityType(QuantityType type) {
 	if (quantityType != type) {
 		quantityType = type;
 		loadTimestep(currentTimestep);
 	}
+}
+
+
+double Simulation::getMinimumValue(void) {
+	double minimum = DBL_MAX;
+
+	if (quantity != NULL) {
+		for (unsigned int i = 0; i < (NRadial + 1)*NAzimuthal; ++i) {
+			if (quantity[i] < minimum) {
+				minimum = quantity[i];
+			}
+		}
+	}
+
+	return minimum;
+}
+
+double Simulation::getMaximumValue(void) {
+	double maximum = -DBL_MAX;
+
+	if (quantity != NULL) {
+		for (unsigned int i = 0; i < (NRadial + 1)*NAzimuthal; ++i) {
+			if (quantity[i] > maximum) {
+				maximum = quantity[i];
+			}
+		}
+	}
+	
+	return maximum;
 }

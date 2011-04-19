@@ -398,13 +398,15 @@ void OpenGLWidget::renderDisk()
 
 	if (gridChanged) {
 		// set colors
-		for (unsigned int nRadial = 0; nRadial <= simulation->getNRadial(); ++nRadial) {
-			for (unsigned int nAzimuthal = 0; nAzimuthal < simulation->getNAzimuthal(); ++nAzimuthal) {
-				index =  nRadial * simulation->getNAzimuthal() + nAzimuthal;
-				diskColor(&diskColors[4*index], simulation->getQuantity()[index], minimumValue, maximumValue, logarithmicScale);
+		if (simulation->getQuantity() != NULL) {
+			for (unsigned int nRadial = 0; nRadial <= simulation->getNRadial(); ++nRadial) {
+				for (unsigned int nAzimuthal = 0; nAzimuthal < simulation->getNAzimuthal(); ++nAzimuthal) {
+					index =  nRadial * simulation->getNAzimuthal() + nAzimuthal;
+					diskColor(&diskColors[4*index], simulation->getQuantity()[index], minimumValue, maximumValue, logarithmicScale);
+				}
 			}
+			gridChanged = false;
 		}
-		gridChanged = false;
 	}
 
 	glPushMatrix();
