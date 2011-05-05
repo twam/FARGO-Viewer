@@ -81,8 +81,11 @@ int Simulation::loadFromFile(const char* filename)
 	fd = fopen(temp, "r");
 	if (fd == NULL) {
 		fprintf(stderr, "Cannot read radii file '%s'!\n", temp);
+		delete [] temp;
 		return -1;
 	}
+	delete [] temp;
+
 	radii = new double[NRadial+1];
 
 	if (!readGhostCells) {
