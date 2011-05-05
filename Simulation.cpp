@@ -15,6 +15,10 @@ Simulation::Simulation()
 	readGhostCells = false;
 	quantityType = DENSITY;
 	quantity = NULL;
+	radii = NULL;
+	planetPositions = NULL;
+	planetVelocities = NULL;
+	planetMasses = NULL;
 }
 
 Simulation::~Simulation()
@@ -28,6 +32,7 @@ Simulation::~Simulation()
 	free(planetMasses);
 
 	delete [] radii;
+
 	if (quantity != NULL) 
 		delete [] quantity;
 }
