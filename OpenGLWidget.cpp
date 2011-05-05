@@ -560,6 +560,9 @@ void OpenGLWidget::renderSky()
 
 void OpenGLWidget::renderKey()
 {
+	if (simulation == NULL)
+		return;
+
 	GLfloat marginRight;
 	if (logarithmicScale) {
 		marginRight = 45;
@@ -652,7 +655,6 @@ void OpenGLWidget::renderKey()
 		glVertex2f(width()-marginRight+0.0, height()-marginTop-(keyHeight*1.0));
 		glEnd();
 		renderText(width()-marginRight+6.0, marginTop+(double)fontSize/2.0+keyHeight*1.0, QString("%1").arg(minimumValue),fontNormal);
-
 
 		// show max value
 		glBegin(GL_LINE_STRIP);

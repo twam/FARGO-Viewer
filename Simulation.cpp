@@ -163,6 +163,7 @@ int Simulation::loadFromFile(const char* filename)
 	fd = fopen(temp, "r");
 	if (fd == NULL) {
 		fprintf(stderr, "Cannot read file '%s'!\n", temp);
+		delete [] temp;
 		return -1;
 	}
 
@@ -203,14 +204,17 @@ int Simulation::loadTimestep(unsigned int timestep)
 			fprintf(stderr, "Could not open '%s'.\n", filename);
 			return -1;
 		}
-		
+		delete [] filename;
+
 		char buffer[1024];
 		for (unsigned int l = 0; l <= timestep; ++l) {
 			if (fgets(buffer, 1024, fd) == NULL) {
+				fclose(fd);
 				return -1;
 			}
 		}
-		
+		fclose(fd);
+
 		unsigned int timestepFile;
 		sscanf(buffer, "%u %lf %lf %lf %lf", &timestepFile, &newPlanetPositions[i*3+0], &newPlanetPositions[i*3+1], &newPlanetVelocities[i*3+0], &newPlanetVelocities[i*3+1]);
 
@@ -219,9 +223,6 @@ int Simulation::loadTimestep(unsigned int timestep)
 			fprintf(stderr, "Line was '%s'\n",buffer);
 			return -3;
 		}
-
-		delete [] filename;
-		fclose(fd);
 	}
 
 	// read grid
@@ -253,6 +254,8 @@ int Simulation::loadTimestep(unsigned int timestep)
 		default:
 			break;
 	}
+
+	delete [] filename;
 
 	if (ret == 0) {
 		double* temp;
