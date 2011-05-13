@@ -210,6 +210,7 @@ int Simulation::loadTimestep(unsigned int timestep)
 			return -1;
 		}
 		delete [] filename;
+		filename = NULL;
 
 		char buffer[1024];
 		for (unsigned int l = 0; l <= timestep; ++l) {
@@ -260,7 +261,8 @@ int Simulation::loadTimestep(unsigned int timestep)
 			break;
 	}
 
-	delete [] filename;
+	if (filename != NULL)
+		delete [] filename;
 
 	if (ret == 0) {
 		double* temp;
