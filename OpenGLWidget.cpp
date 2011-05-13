@@ -42,7 +42,7 @@ OpenGLWidget::OpenGLWidget(QWidget *parent)
 	setNormalZoomFactor(1.0);
 	setFastZoomFactor(5.0);
 
-	setCameraDefaultPosition(Vector<GLdouble, 3>(3,0.0,0.0,-50.0));
+	setCameraDefaultPosition(Vector<GLdouble, 3>(3,0.0,0.0,50.0));
 	setCameraDefaultLookAt(Vector<GLdouble, 3>(3,0.0,0.0,0.0));
 	setCameraDefaultUp(Vector<GLdouble, 3>(3,0.0,1.0,0.0));
 
