@@ -101,7 +101,6 @@ void OpenGLNavigationWidget::setCameraUp(const Vector<GLdouble, 3> &v)
 	updateCameraBasis();
 }
 
-
 /**
 	updates the camera basis (camera forward, camera side, camera up)
 */

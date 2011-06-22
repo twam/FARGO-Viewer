@@ -1,6 +1,7 @@
 #ifndef _OPENGLWIDGET_H_
 #define _OPENGLWIDGET_H_
 
+#include <GL/glew.h>
 #include "OpenGLNavigationWidget.h"
 #include "Simulation.h"
 #include "Palette.h"
@@ -48,13 +49,22 @@ class OpenGLWidget : public OpenGLNavigationWidget
 	private:
 		bool gridChanged;
 
+		bool initDone;
+		void initEverything();
+		void cleanUpEverything();
+	
 		// disk
 		bool showDisk;
-		GLfloat* diskVertices;
-		GLfloat* diskNormals;
-		GLfloat* diskColors;
-		GLuint* diskIndices;
+		//GLfloat* diskVertices;
+		//GLfloat* diskNormals;
+		//GLfloat* diskColors;
+		//GLuint* diskIndices;
+		GLuint diskVerticesVBO;
+		GLuint diskNormalsVBO;
+		GLuint diskColorsVBO;
+		GLuint diskIndicesVBO;
 		void initDisk();
+		void cleanUpDisk();
 		void renderDisk();
 		void diskColor(GLfloat* color, double value, double minValue, double maxValue, bool logarithmic);
 

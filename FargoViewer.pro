@@ -8,6 +8,7 @@ DEPENDPATH += .
 INCLUDEPATH += .
 QT+=opengl
 CONFIG += debug
+LIBS += -lGLEW
 QMAKE_CXXFLAGS_DEBUG = -march=native -O2 -pipe -g
 QMAKE_CXXFLAGS_RELEASE = -march=native -O2 -pipe -DNDEBUG
 

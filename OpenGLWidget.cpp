@@ -11,10 +11,10 @@ GLuint textures[1];
 OpenGLWidget::OpenGLWidget(QWidget *parent)
 : OpenGLNavigationWidget(QGLFormat(QGL::SampleBuffers), parent), simulation(NULL)
 {
-	diskVertices = NULL;
-	diskNormals = NULL;
-	diskColors = NULL;
-	diskIndices = NULL;
+//	diskVertices = NULL;
+//	diskNormals = NULL;
+//	diskColors = NULL;
+//	diskIndices = NULL;
 
 	orbitsVertices = NULL;
 	orbitsDetailLevel = 128;
@@ -57,11 +57,14 @@ OpenGLWidget::OpenGLWidget(QWidget *parent)
 
 OpenGLWidget::~OpenGLWidget()
 {
+	// cleanUp
+	this->setSimulation(NULL);
+
 	// clean up disk data
-	delete [] diskIndices;
-	delete [] diskVertices;
-	delete [] diskColors;
-	delete [] diskNormals;
+//	delete [] diskIndices;
+//	delete [] diskVertices;
+//	delete [] diskColors;
+//	delete [] diskNormals;
 
 	// clean up orbit data
 	delete [] orbitsVertices;
@@ -79,15 +82,14 @@ void OpenGLWidget::setSimulation(Simulation* simulation)
 {
 	this->simulation = simulation;
 
-	initDisk();
-	initGrid();
-	initDiskBorder();
-	initOrbits();
-	initRocheLobe();
+	if (initDone) {
+		cleanUpEverything();
+	}
 
 	resetCamera();
 
 	gridChanged = true;
+
 	update();
 }
 
@@ -148,6 +150,13 @@ void OpenGLWidget::initializeGL()
 	glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
 	glDepthFunc(GL_LEQUAL);
 
+		
+	GLenum err = glewInit();
+	if (GLEW_OK != err) {
+		/* Problem: glewInit failed, something is seriously wrong. */
+		fprintf(stderr, "Error: %s\n", glewGetErrorString(err));
+	}
+
 	initSky();
 
 	glEnable(GL_TEXTURE_2D);
@@ -155,7 +164,6 @@ void OpenGLWidget::initializeGL()
 	QImage sunGL("sun.tga");
 	textures[0]=bindTexture(sunGL,GL_TEXTURE_2D, GL_RGBA);
 	glBindTexture(GL_TEXTURE_2D, 0);
-	
 }
 
 
@@ -194,6 +202,30 @@ void OpenGLWidget::renderPlanets()
 	}
 	glDisable(GL_LIGHTING);
 }
+
+void OpenGLWidget::initEverything() {
+	if (!initDone) {
+		// clean up first (if everything should be left over)
+		cleanUpEverything();
+
+		// initialize everything
+		initDisk();
+		initGrid();
+		initDiskBorder();
+		initOrbits();
+		initRocheLobe();
+
+		// cache that we initialized
+		initDone = true;
+	}
+}
+
+void OpenGLWidget::cleanUpEverything() {
+	cleanUpDisk();
+
+	initDone = false;
+}
+
 
 void OpenGLWidget::initOrbits()
 {
@@ -320,65 +352,120 @@ void OpenGLWidget::renderRocheLobe()
 
 void OpenGLWidget::initDisk()
 {
+	unsigned int bufferSize;
+	
 	if (simulation == NULL)
 		return;
 
-	unsigned int index = 0;
+	unsigned int index;
 
-	delete [] diskVertices;
-	diskVertices = new GLfloat[3*((simulation->getNRadial()+1)*simulation->getNAzimuthal())];
-	delete [] diskNormals;
-	diskNormals = new GLfloat[3*((simulation->getNRadial()+1)*simulation->getNAzimuthal())];
-	delete [] diskIndices;
-	diskIndices = new GLuint[4*((simulation->getNRadial())*simulation->getNAzimuthal())];
-	delete [] diskColors;
-	diskColors = new GLfloat[4*((simulation->getNRadial()+1)*simulation->getNAzimuthal())];
+	//delete [] diskVertices;
+	//diskVertices = new GLfloat[3*((simulation->getNRadial()+1)*simulation->getNAzimuthal())];
+//	delete [] diskNormals;
+//	diskNormals = new GLfloat[3*((simulation->getNRadial()+1)*simulation->getNAzimuthal())];
+	//delete [] diskIndices;
+	//diskIndices = new GLuint[4*((simulation->getNRadial())*simulation->getNAzimuthal())];
+//	delete [] diskColors;
+//	diskColors = new GLfloat[4*((simulation->getNRadial()+1)*simulation->getNAzimuthal())];
+
+	// vertices
+	glGenBuffers(1, &diskVerticesVBO);
+	glBindBuffer(GL_ARRAY_BUFFER, diskVerticesVBO);
+
+	bufferSize = 3*((simulation->getNRadial()+1)*simulation->getNAzimuthal())*sizeof(GLfloat);
+	GLfloat *bufferVertices = (GLfloat*)malloc(bufferSize);
 
 	for (unsigned int nRadial = 0; nRadial <= simulation->getNRadial(); ++nRadial) {
 		for (unsigned int nAzimuthal = 0; nAzimuthal < simulation->getNAzimuthal(); ++nAzimuthal) {
 			index =  nRadial * simulation->getNAzimuthal() + nAzimuthal;
-			diskVertices[3*index+0] = simulation->getRadii()[nRadial]*cos(2.0*M_PI/simulation->getNAzimuthal()*nAzimuthal);
-			diskVertices[3*index+1] = simulation->getRadii()[nRadial]*sin(2.0*M_PI/simulation->getNAzimuthal()*nAzimuthal);
-			diskVertices[3*index+2] = 0;
+			bufferVertices[3*index+0] = simulation->getRadii()[nRadial]*cos(2.0*M_PI/simulation->getNAzimuthal()*nAzimuthal);
+			bufferVertices[3*index+1] = simulation->getRadii()[nRadial]*sin(2.0*M_PI/simulation->getNAzimuthal()*nAzimuthal);
+			bufferVertices[3*index+2] = 0;
 		}
 	}
+
+	glBufferData(GL_ARRAY_BUFFER, bufferSize, bufferVertices, GL_STATIC_DRAW);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+	free(bufferVertices);
+
+	// indices
+	glGenBuffers(1, &diskIndicesVBO);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, diskIndicesVBO);
+
+	bufferSize = 4*((simulation->getNRadial())*simulation->getNAzimuthal())*sizeof(GLuint);
+	GLuint* bufferIndices = (GLuint*)malloc(bufferSize);
 
 	// set indices (tells open gl which vertices belong to a quad)
 	for (unsigned int nRadial = 0; nRadial < simulation->getNRadial(); ++nRadial) {
 		for (unsigned int nAzimuthal = 0; nAzimuthal < simulation->getNAzimuthal(); ++nAzimuthal) {
 			index = nRadial * simulation->getNAzimuthal() + nAzimuthal;
-			diskIndices[4*index+0] = index;
-			diskIndices[4*index+1] = index+simulation->getNAzimuthal();
+			bufferIndices[4*index+0] = index;
+			bufferIndices[4*index+1] = index+simulation->getNAzimuthal();
 			if (nAzimuthal == simulation->getNAzimuthal()-1) {
-				diskIndices[4*index+2] = index+1;
-				diskIndices[4*index+3] = index+1-simulation->getNAzimuthal();
+				bufferIndices[4*index+2] = index+1;
+				bufferIndices[4*index+3] = index+1-simulation->getNAzimuthal();
 			} else {
-				diskIndices[4*index+2] = index+simulation->getNAzimuthal()+1;
-				diskIndices[4*index+3] = index+1;
+				bufferIndices[4*index+2] = index+simulation->getNAzimuthal()+1;
+				bufferIndices[4*index+3] = index+1;
 			}
 		}
 	}
 
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, bufferSize, bufferIndices, GL_STATIC_DRAW);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+
+	free(bufferIndices);
+
 	// normals
+	glGenBuffers(1, &diskNormalsVBO);
+	glBindBuffer(GL_ARRAY_BUFFER, diskNormalsVBO);
+
+	bufferSize = 3*((simulation->getNRadial()+1)*simulation->getNAzimuthal())*sizeof(GLfloat);
+	GLfloat *bufferNormals = (GLfloat*)malloc(bufferSize);
+	
 	for (unsigned int nRadial = 0; nRadial <= simulation->getNRadial(); ++nRadial) {
 		for (unsigned int nAzimuthal = 0; nAzimuthal < simulation->getNAzimuthal(); ++nAzimuthal) {
 			index =  nRadial * simulation->getNAzimuthal() + nAzimuthal;
-			diskNormals[3*index+0] = 0.0;
-			diskNormals[3*index+1] = 0.0;
-			diskNormals[3*index+2] = 1.0;
+			bufferNormals[3*index+0] = 0.0;
+			bufferNormals[3*index+1] = 0.0;
+			bufferNormals[3*index+2] = 1.0;
 		}
 	}
 
+	glBufferData(GL_ARRAY_BUFFER, bufferSize, bufferNormals, GL_STATIC_DRAW);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+	free(bufferNormals);
+
 	// colors
+	glGenBuffers(1, &diskColorsVBO);
+	glBindBuffer(GL_ARRAY_BUFFER, diskColorsVBO);
+
+	bufferSize = 4*((simulation->getNRadial()+1)*simulation->getNAzimuthal())*sizeof(GLfloat);
+	GLfloat *bufferColors = (GLfloat*)malloc(bufferSize);
+	
 	for (unsigned int nRadial = 0; nRadial <= simulation->getNRadial(); ++nRadial) {
 		for (unsigned int nAzimuthal = 0; nAzimuthal < simulation->getNAzimuthal(); ++nAzimuthal) {
 			index =  nRadial * simulation->getNAzimuthal() + nAzimuthal;
-			diskColors[4*index+0] = 1.0;
-			diskColors[4*index+1] = 1.0;
-			diskColors[4*index+2] = 1.0;
-			diskColors[4*index+3] = 1.0;
+			bufferColors[4*index+0] = 1.0;
+			bufferColors[4*index+1] = 1.0;
+			bufferColors[4*index+2] = 1.0;
+			bufferColors[4*index+3] = 1.0;
 		}
 	}
+	
+	glBufferData(GL_ARRAY_BUFFER, bufferSize, bufferColors, GL_STATIC_DRAW);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+	free(bufferColors);
+	
+}
+
+void OpenGLWidget::cleanUpDisk()
+{
+	glDeleteBuffers(1, &diskVerticesVBO);
+	glDeleteBuffers(1, &diskIndicesVBO);
 }
 
 void OpenGLWidget::initGrid()
@@ -397,29 +484,60 @@ void OpenGLWidget::renderDisk()
 	unsigned int index;
 
 	if (gridChanged) {
+		// colors
+		glBindBuffer(GL_ARRAY_BUFFER, diskColorsVBO);
+
+		unsigned int bufferSize = 4*((simulation->getNRadial()+1)*simulation->getNAzimuthal())*sizeof(GLfloat);
+		GLfloat *bufferColors = (GLfloat*)malloc(bufferSize);
+
 		// set colors
 		if (simulation->getQuantity() != NULL) {
 			for (unsigned int nRadial = 0; nRadial <= simulation->getNRadial(); ++nRadial) {
 				for (unsigned int nAzimuthal = 0; nAzimuthal < simulation->getNAzimuthal(); ++nAzimuthal) {
 					index =  nRadial * simulation->getNAzimuthal() + nAzimuthal;
-					diskColor(&diskColors[4*index], simulation->getQuantity()[index], minimumValue, maximumValue, logarithmicScale);
+					diskColor(&bufferColors[4*index], simulation->getQuantity()[index], minimumValue, maximumValue, logarithmicScale);
 				}
 			}
 			gridChanged = false;
 		}
+
+		glBufferData(GL_ARRAY_BUFFER, bufferSize, bufferColors, GL_STATIC_DRAW);
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+		free(bufferColors);
 	}
 
 	glPushMatrix();
+
+	// activate arrays
 	glEnableClientState(GL_VERTEX_ARRAY);
 	glEnableClientState(GL_NORMAL_ARRAY);
 	glEnableClientState(GL_COLOR_ARRAY);
-	glVertexPointer(3, GL_FLOAT, 0, diskVertices);
-	glNormalPointer(GL_FLOAT, 0, diskNormals);
-	glColorPointer(4, GL_FLOAT, 0, diskColors);
-	glDrawElements(GL_QUADS, 4*((simulation->getNRadial())*simulation->getNAzimuthal()), GL_UNSIGNED_INT, diskIndices);
+
+	// bind VBOs and set data
+	glBindBuffer(GL_ARRAY_BUFFER, diskVerticesVBO);
+	glVertexPointer(3, GL_FLOAT, 0, 0);
+
+	glBindBuffer(GL_ARRAY_BUFFER, diskNormalsVBO);
+	glNormalPointer(GL_FLOAT, 0, 0);
+
+	glBindBuffer(GL_ARRAY_BUFFER, diskColorsVBO);
+	glColorPointer(4, GL_FLOAT, 0, 0);
+
+	// bind VBO for index array
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, diskIndicesVBO);
+	glDrawElements(GL_QUADS, 4*((simulation->getNRadial())*simulation->getNAzimuthal()), GL_UNSIGNED_INT, 0);
+
+	// bind with 0, so, switch back to normal pointer operation
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0); // for indices
+
+	// deactivate vertex array
 	glDisableClientState(GL_VERTEX_ARRAY);
 	glDisableClientState(GL_NORMAL_ARRAY);
 	glDisableClientState(GL_COLOR_ARRAY);
+	
+	//glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);	
 
 	glPopMatrix();
 }
@@ -432,17 +550,32 @@ void OpenGLWidget::renderGrid()
 	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 	glEnable(GL_LINE_SMOOTH);
 	glPushMatrix();
+	
+	// activate arrays
 	glEnableClientState(GL_VERTEX_ARRAY);
 	glEnableClientState(GL_NORMAL_ARRAY);
-	glVertexPointer(3, GL_FLOAT, 0, diskVertices);
-	glNormalPointer(GL_FLOAT, 0, diskNormals);
+	
+	// bind VBOs and set data
+	glBindBuffer(GL_ARRAY_BUFFER, diskVerticesVBO);
+	glVertexPointer(3, GL_FLOAT, 0, 0);
+
+	glBindBuffer(GL_ARRAY_BUFFER, diskNormalsVBO);
+	glNormalPointer(GL_FLOAT, 0, 0);
+	
 	glColor3ub(0x80,0x80,0x80);
-	glDrawElements(GL_QUADS, 4*((simulation->getNRadial())*simulation->getNAzimuthal()), GL_UNSIGNED_INT, diskIndices);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, diskIndicesVBO);	
+	glDrawElements(GL_QUADS, 4*((simulation->getNRadial())*simulation->getNAzimuthal()), GL_UNSIGNED_INT, 0);
+
+	// bind with 0, so, switch back to normal pointer operation
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0); // for indices
+
 	glDisableClientState(GL_VERTEX_ARRAY);
 	glDisableClientState(GL_NORMAL_ARRAY);
 	glPopMatrix();
 	glDisable(GL_LINE_SMOOTH);	
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+	
 }
 
 void OpenGLWidget::diskColor(GLfloat* color, double value, double minValue, double maxValue, bool logarithmic)
@@ -695,6 +828,8 @@ void OpenGLWidget::renderKey()
 
 void OpenGLWidget::paintGL()
 {
+	initEverything();
+
 	if (useMultisampling && supportMultisampling) {
 		glEnable(GL_MULTISAMPLE_ARB);
 	}
