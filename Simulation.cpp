@@ -65,8 +65,15 @@ int Simulation::loadFromFile(const char* filename)
 	strncpy(temp, filename, (strrchr(filename,'/')-filename-2));
 	temp[(strrchr(filename,'/')-filename-2)] = 0;
 
-	outputDirectory = new char[strlen(temp)+strlen(config::value_as_string("OutputDir"))+1];
+	outputDirectory = new char[strlen(temp)+strlen(config::value_as_string("OutputDir"))+2];
 	sprintf(outputDirectory,"%s%s",temp,config::value_as_string("OutputDir"));
+
+	// add ending / to output directory if neccessary
+	if (outputDirectory[strlen(outputDirectory)] != '/') {
+		unsigned int pos = strlen(outputDirectory);
+		outputDirectory[pos] = '/'; 
+		outputDirectory[pos+1] = 0;
+	}
 
 	if ((config::key_exists("PLANETCONFIG")) && (strlen(config::value_as_string("PLANETCONFIG"))>0)) {
 		planetConfigFilename = new char[strlen(temp)+strlen(config::value_as_string("PLANETCONFIG"))+1];
@@ -166,20 +173,18 @@ int Simulation::loadFromFile(const char* filename)
 	temp = new char[strlen(outputDirectory)+1+15];
 	sprintf(temp, "%s/Quantities.dat", outputDirectory);
 	fd = fopen(temp, "r");
-	if (fd == NULL) {
-		fprintf(stderr, "Cannot read file '%s'!\n", temp);
-		delete [] temp;
-		return -1;
-	}
+	delete [] temp;
+	
+	// check in file if exists
+	if (fd != NULL) {
+		unsigned int line = 0;
+		while (fgets(buffer, sizeof(buffer), fd) != NULL) {
+			line++;
+		}
+		totalTimestep = line-2;
 
-	unsigned int line = 0;
-	while (fgets(buffer, sizeof(buffer), fd) != NULL) {
-		line++;
+		fclose(fd);
 	}
-	totalTimestep = line-2;
-
-	delete[] temp;
-	fclose(fd);
 
 	loadTimestep(0);
 
@@ -198,11 +203,10 @@ int Simulation::loadTimestep(unsigned int timestep)
 
 	double* newPlanetPositions = (double*)malloc(NPlanets*3*sizeof(double));
 	double* newPlanetVelocities = (double*)malloc(NPlanets*3*sizeof(double));
-
+	
 	for (unsigned int i = 1; i < NPlanets; ++i) {
 		filename = new char[strlen(outputDirectory)+1+10+(unsigned int)(log(NPlanets)/log(10)+1)];
 		sprintf(filename, "%splanet%u.dat", outputDirectory, i);
-
 
 		fd = fopen(filename,"r");
 		if (fd == NULL) {
