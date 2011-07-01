@@ -8,6 +8,11 @@ class FARGO : public Simulation
 	Q_OBJECT
 
 	public:
+		enum Version {
+			FARGO_ORIGINAL,
+			FARGO_TWAM,
+			N_VERSION
+		};
 
 		FARGO();
 		~FARGO();
@@ -31,6 +36,8 @@ class FARGO : public Simulation
 		double getMaximumValue(void) const;
 
 	private:
+		Version version;
+		
 		QuantityType quantityType;
 		bool readGhostCells;
 		char *configFilename;

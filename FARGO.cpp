@@ -8,17 +8,22 @@
 
 FARGO::FARGO()
 {
+	version = FARGO_TWAM;
 	configFilename = NULL;
 	outputDirectory = NULL;
 	planetConfigFilename = NULL;
 	NPlanets = 0;
-	readGhostCells = false;
+	readGhostCells = true;
 	quantityType = DENSITY;
 	quantity = NULL;
 	radii = NULL;
 	planetPositions = NULL;
 	planetVelocities = NULL;
 	planetMasses = NULL;
+	
+	if (version == FARGO_TWAM) {
+		readGhostCells = false;
+	}
 }
 
 FARGO::~FARGO()
@@ -58,7 +63,7 @@ int FARGO::loadFromFile(const char* filename)
 	currentTimestep = 0;
 	
 	if (!readGhostCells) {
-		NRadial-=2;
+		NRadial -= 2;
 	}
 
 	char *temp = new char[strlen(filename)];
@@ -170,20 +175,22 @@ int FARGO::loadFromFile(const char* filename)
 	}
 
 	// check for last timestep
-	temp = new char[strlen(outputDirectory)+1+15];
-	sprintf(temp, "%s/Quantities.dat", outputDirectory);
-	fd = fopen(temp, "r");
-	delete [] temp;
+	if (version == FARGO_TWAM) {
+		temp = new char[strlen(outputDirectory)+1+15];
+		sprintf(temp, "%s/Quantities.dat", outputDirectory);
+		fd = fopen(temp, "r");
+		delete [] temp;
 	
-	// check in file if exists
-	if (fd != NULL) {
-		unsigned int line = 0;
-		while (fgets(buffer, sizeof(buffer), fd) != NULL) {
-			line++;
-		}
-		totalTimestep = line-2;
+		// check in file if exists
+		if (fd != NULL) {
+			unsigned int line = 0;
+			while (fgets(buffer, sizeof(buffer), fd) != NULL) {
+				line++;
+			}
+			totalTimestep = line-2;
 
-		fclose(fd);
+			fclose(fd);
+		}
 	}
 
 	loadTimestep(0);
@@ -206,11 +213,17 @@ int FARGO::loadTimestep(unsigned int timestep)
 	
 	for (unsigned int i = 1; i < NPlanets; ++i) {
 		filename = new char[strlen(outputDirectory)+1+10+(unsigned int)(log(NPlanets)/log(10)+1)];
-		sprintf(filename, "%splanet%u.dat", outputDirectory, i);
-
+		
+		if (version == FARGO_TWAM) {
+			sprintf(filename, "%splanet%u.dat", outputDirectory, i);
+		} else {
+			sprintf(filename, "%splanet%u.dat", outputDirectory, i-1);
+		}
+		
 		fd = fopen(filename,"r");
 		if (fd == NULL) {
 			fprintf(stderr, "Could not open '%s'.\n", filename);
+			delete [] filename;
 			return -1;
 		}
 		delete [] filename;
@@ -296,7 +309,7 @@ int FARGO::loadTimestep(unsigned int timestep)
 	\param scalar is this a scalar or vector grid
 */
 int FARGO::loadGrid(double* dest, const char* filename, bool scalar)
-{
+{	
 	FILE *fd = fopen(filename, "rb");
 	if (fd == NULL) {
 		fprintf(stderr, "Could not open '%s'!\n", filename);
@@ -334,10 +347,22 @@ int FARGO::loadGrid(double* dest, const char* filename, bool scalar)
 			}
 		}
 	} else {
-		if (fread(dest, sizeof(double), (NRadial+1)*NAzimuthal, fd)<(NRadial+1)*NAzimuthal) {
-			fprintf(stderr, "Error while reading '%s' (%lu bytes).\n", filename,(NRadial+1)*NAzimuthal*sizeof(double));
-			goto loadGrid_cleanUp;
-		}		
+		switch (version) {
+			case FARGO_TWAM:
+				if (fread(dest, sizeof(double), (NRadial+1)*NAzimuthal, fd)<(NRadial+1)*NAzimuthal) {
+					fprintf(stderr, "Error while reading '%s' (%lu bytes).\n", filename,(NRadial+1)*NAzimuthal*sizeof(double));
+					goto loadGrid_cleanUp;
+				}			
+				break;
+				
+			default:
+				if (fread(dest, sizeof(double), (NRadial)*NAzimuthal, fd)<(NRadial)*NAzimuthal) {
+					fprintf(stderr, "Error while reading '%s' (%lu bytes).\n", filename,(NRadial)*NAzimuthal*sizeof(double));
+					goto loadGrid_cleanUp;
+				}
+				break;
+		}
+			
 	}
 
 loadGrid_cleanUp:
@@ -422,7 +447,7 @@ unsigned int FARGO::getNAzimuthal() const {
 }
 
 double FARGO::getRMin() const {
-		return rMin;
+	return rMin;
 }
 
 double FARGO::getRMax() const {
