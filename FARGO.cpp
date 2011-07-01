@@ -1,4 +1,4 @@
-#include "Simulation.h"
+#include "FARGO.h"
 #include "config.h"
 #include <string.h>
 #include <stdlib.h>
@@ -6,7 +6,7 @@
 #include <math.h>
 #include <float.h>
 
-Simulation::Simulation()
+FARGO::FARGO()
 {
 	configFilename = NULL;
 	outputDirectory = NULL;
@@ -21,7 +21,7 @@ Simulation::Simulation()
 	planetMasses = NULL;
 }
 
-Simulation::~Simulation()
+FARGO::~FARGO()
 {
 	delete [] configFilename;
 	delete [] outputDirectory;
@@ -37,7 +37,7 @@ Simulation::~Simulation()
 		delete [] quantity;
 }
 
-int Simulation::loadFromFile(const char* filename)
+int FARGO::loadFromFile(const char* filename)
 {
 	char buffer[512];
 	FILE *fd;
@@ -193,7 +193,7 @@ int Simulation::loadFromFile(const char* filename)
 	return 0;
 }
 
-int Simulation::loadTimestep(unsigned int timestep)
+int FARGO::loadTimestep(unsigned int timestep)
 {
 	// TODO: On errors, memory leakage occurs!
 	int ret = 0;
@@ -295,7 +295,7 @@ int Simulation::loadTimestep(unsigned int timestep)
 	\param filename filename to read
 	\param scalar is this a scalar or vector grid
 */
-int Simulation::loadGrid(double* dest, const char* filename, bool scalar)
+int FARGO::loadGrid(double* dest, const char* filename, bool scalar)
 {
 	FILE *fd = fopen(filename, "rb");
 	if (fd == NULL) {
@@ -347,7 +347,7 @@ loadGrid_cleanUp:
 	return 0;
 }
 
-void Simulation::setQuantityType(QuantityType type) {
+void FARGO::setQuantityType(QuantityType type) {
 	if (quantityType != type) {
 		quantityType = type;
 		loadTimestep(currentTimestep);
@@ -355,7 +355,7 @@ void Simulation::setQuantityType(QuantityType type) {
 }
 
 
-double Simulation::getMinimumValue(void) {
+double FARGO::getMinimumValue(void) const {
 	double minimum = DBL_MAX;
 
 	if (quantity != NULL) {
@@ -369,7 +369,7 @@ double Simulation::getMinimumValue(void) {
 	return minimum;
 }
 
-double Simulation::getMaximumValue(void) {
+double FARGO::getMaximumValue(void) const {
 	double maximum = -DBL_MAX;
 
 	if (quantity != NULL) {
@@ -381,4 +381,58 @@ double Simulation::getMaximumValue(void) {
 	}
 	
 	return maximum;
+}
+
+unsigned int FARGO::getNumberOfPlanets() const
+{
+	return NPlanets; 
+}
+
+const double* FARGO::getPlanetPosition(unsigned int number) const
+{
+	return &planetPositions[number*3];
+}
+
+const double* FARGO::getPlanetVelocity(unsigned int number) const
+{
+	return &planetVelocities[number*3];
+}
+
+const double* FARGO::getPlanetMass(unsigned int number) const
+{
+	return &planetMasses[number];
+}
+
+unsigned int FARGO::getCurrentTimestep() const
+{
+	return currentTimestep;
+}
+
+unsigned int FARGO::getLastTimeStep() const
+{
+	return totalTimestep;
+}
+
+unsigned int FARGO::getNRadial() const {
+	return NRadial;
+}
+
+unsigned int FARGO::getNAzimuthal() const {
+	return NAzimuthal;
+}
+
+double FARGO::getRMin() const {
+		return rMin;
+}
+
+double FARGO::getRMax() const {
+	return rMax;
+}
+
+const double* FARGO::getRadii() const {
+	return radii;
+}
+
+const double* FARGO::getQuantity() const {
+	return quantity;
 }

@@ -8,6 +8,7 @@
 #include <QInputDialog>
 #include <float.h>
 #include "Simulation.h"
+#include "FARGO.h"
 #include "util.h"
 
 MainWidget::MainWidget(QWidget *parent)
@@ -532,7 +533,7 @@ void MainWidget::loadSimulation(QString filename)
 	} else {
 		delete simulation;
 		setSimulation(NULL);
-		simulation = new Simulation;
+		simulation = new FARGO;
 		if (simulation->loadFromFile(filename.toAscii().data()) == 0) {
 			setSimulation(simulation);
 			settings->setValue("lastSimulation", filename);
