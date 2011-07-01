@@ -11,7 +11,6 @@ GLuint textures[1];
 OpenGLWidget::OpenGLWidget(QWidget *parent)
 : OpenGLNavigationWidget(QGLFormat(QGL::SampleBuffers), parent), simulation(NULL)
 {
-	orbitsVertices = NULL;
 	orbitsDetailLevel = 128;
 
 	rocheLobeVertices = NULL;
@@ -46,6 +45,8 @@ OpenGLWidget::OpenGLWidget(QWidget *parent)
 	maximumValue = 1000;
 	logarithmicScale = true;
 
+	initDone = false;
+
 	gridChanged = true;
 }
 
@@ -53,9 +54,6 @@ OpenGLWidget::~OpenGLWidget()
 {
 	// cleanUp
 	this->setSimulation(NULL);
-
-	// clean up orbit data
-	delete [] orbitsVertices;
 
 	// clean up Roche Lobe data
 	delete [] rocheLobeVertices;
@@ -214,6 +212,7 @@ void OpenGLWidget::initEverything() {
 void OpenGLWidget::cleanUpEverything() {
 	cleanUpDisk();
 	cleanUpDiskBorder();
+	cleanUpOrbits();
 
 	initDone = false;
 }
@@ -224,21 +223,17 @@ void OpenGLWidget::initOrbits()
 	if (this->simulation == NULL)
 		return;
 
-	// we need 3 coordinates for each point of each planet (except for central star)
-	delete [] orbitsVertices;
-	orbitsVertices = new GLfloat[3*orbitsDetailLevel*(simulation->getNumberOfPlanets()-1)];
-}
-
-void OpenGLWidget::renderOrbits()
-{
-	if (simulation == NULL)
+	if (this->simulation == NULL)
 		return;
 
-	glEnable(GL_LINE_SMOOTH);
+	// vertices
+	glGenBuffers(1, &orbitsVerticesVBO);
+	glBindBuffer(GL_ARRAY_BUFFER, orbitsVerticesVBO);
+
+	unsigned int bufferSize = simulation->getNumberOfPlanets()*3*orbitsDetailLevel*sizeof(GLfloat);
+	GLfloat *bufferVertices = (GLfloat*)malloc(bufferSize);
 
 	for (unsigned int i = 1; i < simulation->getNumberOfPlanets(); ++i) {
-		glPushMatrix();
-
 		double x = simulation->getPlanetPosition(i)[0];
 		double y = simulation->getPlanetPosition(i)[1];
 		double v_x = simulation->getPlanetVelocity(i)[0];
@@ -257,22 +252,47 @@ void OpenGLWidget::renderOrbits()
 		double semi_minor_axis = semi_major_axis * sqrt(1.0 -pow2(eccentricity));
 
 		for (unsigned int j = 0; j < orbitsDetailLevel; ++j) {
-			orbitsVertices[((i-1)*3*orbitsDetailLevel)+3*j+0] = semi_major_axis*sin(2.0*M_PI/(float)orbitsDetailLevel*(float)j);
-			orbitsVertices[((i-1)*3*orbitsDetailLevel)+3*j+1] = semi_minor_axis*cos(2.0*M_PI/(float)orbitsDetailLevel*(float)j);
-			orbitsVertices[((i-1)*3*orbitsDetailLevel)+3*j+2] = 0.0;
+			bufferVertices[((i-1)*3*orbitsDetailLevel)+3*j+0] = eccentricity*semi_major_axis + semi_major_axis*sin(2.0*M_PI/(float)orbitsDetailLevel*(float)j);
+			bufferVertices[((i-1)*3*orbitsDetailLevel)+3*j+1] = semi_minor_axis*cos(2.0*M_PI/(float)orbitsDetailLevel*(float)j);
+			bufferVertices[((i-1)*3*orbitsDetailLevel)+3*j+2] = 0.0;
 		}
-
-		glTranslated(eccentricity*semi_major_axis,0,0);
-	
-		glColor3ub(0x80,0x80,0x80);
-		glBegin(GL_LINE_LOOP);
-		for (unsigned int j = 0; j < orbitsDetailLevel; ++j) {
-			glVertex3fv(&orbitsVertices[((i-1)*3*orbitsDetailLevel)+3*j]);
-		}
-		glEnd();
-
-		glPopMatrix();
 	}
+
+	glBufferData(GL_ARRAY_BUFFER, bufferSize, bufferVertices, GL_STATIC_DRAW);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+	free(bufferVertices);
+}
+
+void OpenGLWidget::cleanUpOrbits()
+{
+	glDeleteBuffers(1, &orbitsVerticesVBO);
+}
+
+void OpenGLWidget::renderOrbits()
+{
+	if (simulation == NULL)
+		return;
+
+
+	glEnable(GL_LINE_SMOOTH);
+
+	// activate arrays
+	glEnableClientState(GL_VERTEX_ARRAY);
+
+	// bind VBOs and set data
+	glBindBuffer(GL_ARRAY_BUFFER, orbitsVerticesVBO);
+	glVertexPointer(3, GL_FLOAT, 0, 0);
+
+	glColor3ub(0x80,0x80,0x80);
+
+	for (unsigned int i = 1; i < simulation->getNumberOfPlanets(); ++i) {
+		glDrawArrays(GL_LINE_LOOP, (i-1)*orbitsDetailLevel, orbitsDetailLevel);
+	}
+
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+	glDisableClientState(GL_VERTEX_ARRAY);
 
 	glDisable(GL_LINE_SMOOTH);
 }
@@ -594,10 +614,10 @@ void OpenGLWidget::initDiskBorder()
 		return;
 
 	// vertices
-	glGenBuffers(2, &diskBorderVerticesVBO);
+	glGenBuffers(1, &diskBorderVerticesVBO);
 	glBindBuffer(GL_ARRAY_BUFFER, diskBorderVerticesVBO);
 
-	unsigned int bufferSize = 2*3*orbitsDetailLevel*sizeof(GLfloat);
+	unsigned int bufferSize = 2*3*diskBorderDetailLevel*sizeof(GLfloat);
 	GLfloat *bufferVertices = (GLfloat*)malloc(bufferSize);
 
 	for (unsigned int i = 0; i < 2; ++i) {
@@ -610,9 +630,9 @@ void OpenGLWidget::initDiskBorder()
 		}
 
 		for (unsigned int j = 0; j < orbitsDetailLevel; ++j) {
-			bufferVertices[i*3*orbitsDetailLevel+3*j+0] = r*sin(2.0*M_PI/(float)orbitsDetailLevel*(float)j);
-			bufferVertices[i*3*orbitsDetailLevel+3*j+1] = r*cos(2.0*M_PI/(float)orbitsDetailLevel*(float)j);
-			bufferVertices[i*3*orbitsDetailLevel+3*j+2] = 0.0;
+			bufferVertices[i*3*diskBorderDetailLevel+3*j+0] = r*sin(2.0*M_PI/(float)orbitsDetailLevel*(float)j);
+			bufferVertices[i*3*diskBorderDetailLevel+3*j+1] = r*cos(2.0*M_PI/(float)orbitsDetailLevel*(float)j);
+			bufferVertices[i*3*diskBorderDetailLevel+3*j+2] = 0.0;
 		}
 	}
 
@@ -643,8 +663,8 @@ void OpenGLWidget::renderDiskBorder()
 	glVertexPointer(3, GL_FLOAT, 0, 0);
 
 	glColor3ub(0x80,0x80,0x80);
-	glDrawArrays(GL_LINE_LOOP, 0, orbitsDetailLevel);
-	glDrawArrays(GL_LINE_LOOP, orbitsDetailLevel, orbitsDetailLevel);
+	glDrawArrays(GL_LINE_LOOP, 0, diskBorderDetailLevel);
+	glDrawArrays(GL_LINE_LOOP, diskBorderDetailLevel, diskBorderDetailLevel);
 
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 

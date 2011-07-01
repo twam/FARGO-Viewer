@@ -83,9 +83,10 @@ class OpenGLWidget : public OpenGLNavigationWidget
 
 		// orbits
 		bool showOrbits;
-		GLfloat* orbitsVertices;
+		GLuint orbitsVerticesVBO;
 		unsigned int orbitsDetailLevel;
 		void initOrbits();
+		void cleanUpOrbits();
 		void renderOrbits();
 
 		// roche lobe
