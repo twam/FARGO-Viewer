@@ -11,11 +11,6 @@ GLuint textures[1];
 OpenGLWidget::OpenGLWidget(QWidget *parent)
 : OpenGLNavigationWidget(QGLFormat(QGL::SampleBuffers), parent), simulation(NULL)
 {
-//	diskVertices = NULL;
-//	diskNormals = NULL;
-//	diskColors = NULL;
-//	diskIndices = NULL;
-
 	orbitsVertices = NULL;
 	orbitsDetailLevel = 128;
 
@@ -59,12 +54,6 @@ OpenGLWidget::~OpenGLWidget()
 {
 	// cleanUp
 	this->setSimulation(NULL);
-
-	// clean up disk data
-//	delete [] diskIndices;
-//	delete [] diskVertices;
-//	delete [] diskColors;
-//	delete [] diskNormals;
 
 	// clean up orbit data
 	delete [] orbitsVertices;
@@ -144,6 +133,9 @@ void OpenGLWidget::initializeGL()
 	glShadeModel(GL_SMOOTH);
 	glEnable(GL_NORMALIZE);
 	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
+
+	glClearColor(0.0, 0.0, 0.0, 0.0);
 
 	glShadeModel(GL_SMOOTH);
 
@@ -358,15 +350,6 @@ void OpenGLWidget::initDisk()
 		return;
 
 	unsigned int index;
-
-	//delete [] diskVertices;
-	//diskVertices = new GLfloat[3*((simulation->getNRadial()+1)*simulation->getNAzimuthal())];
-//	delete [] diskNormals;
-//	diskNormals = new GLfloat[3*((simulation->getNRadial()+1)*simulation->getNAzimuthal())];
-	//delete [] diskIndices;
-	//diskIndices = new GLuint[4*((simulation->getNRadial())*simulation->getNAzimuthal())];
-//	delete [] diskColors;
-//	diskColors = new GLfloat[4*((simulation->getNRadial()+1)*simulation->getNAzimuthal())];
 
 	// vertices
 	glGenBuffers(1, &diskVerticesVBO);
@@ -835,11 +818,7 @@ void OpenGLWidget::paintGL()
 	}
 
 	// clear view
-	glClearColor(0.0, 0.0, 0.0, 0.0);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-	glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
-	glClear(GL_COLOR_BUFFER_BIT);
 
 	// setup camera view
 	setupCamera();
