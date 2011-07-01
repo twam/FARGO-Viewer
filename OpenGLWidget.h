@@ -55,10 +55,6 @@ class OpenGLWidget : public OpenGLNavigationWidget
 	
 		// disk
 		bool showDisk;
-		//GLfloat* diskVertices;
-		//GLfloat* diskNormals;
-		//GLfloat* diskColors;
-		//GLuint* diskIndices;
 		GLuint diskVerticesVBO;
 		GLuint diskNormalsVBO;
 		GLuint diskColorsVBO;
@@ -74,10 +70,11 @@ class OpenGLWidget : public OpenGLNavigationWidget
 		void renderGrid();
 
 		// disk border
+		GLuint diskBorderVerticesVBO;
 		bool showDiskBorder;
-		GLfloat* diskBorderVertices;
 		unsigned int diskBorderDetailLevel;
 		void initDiskBorder();
+		void cleanUpDiskBorder();
 		void renderDiskBorder();
 
 		// planets
