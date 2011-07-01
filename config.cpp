@@ -67,7 +67,6 @@ static char *parse_value(void);
 static int get_value(char *key, unsigned int len);
 static int parse_file();
 static void die_bad_config(const char *key);
-static int parse_unit_factor(const char *end, unsigned long *val);
 static const char *value(const char *key);
 static int parse_long(const char *value, long *ret);
 static int parse_unsigned_long(const char *value, unsigned long *ret);
@@ -91,7 +90,7 @@ static void add_to_config_list(const char *key, const char *value)
 
 	list.data[list.size-1].key = (char*)malloc((strlen(key)+1)*sizeof(char));
 	list.data[list.size-1].value = (char*)malloc((strlen(value)+1)*sizeof(char));
-	
+
 	strcpy(list.data[list.size-1].key,key);
 	strcpy(list.data[list.size-1].value,value);
 }
@@ -359,32 +358,6 @@ static void die_bad_config(const char *key)
 }
 
 /**
-	Get a unit factor like (k)ilo, (M)ega, (G)iga
-
-	\param end pointer to red unit factor
-	\param val value to multiply unit factor with
-	\returns 1 on success, 0 on error
-*/
-static int parse_unit_factor(const char *end, unsigned long *val)
-{
-	if (!*end)
-		return 1;
-	else if (!strcasecmp(end, "k")) {
-		*val *= 1000;
-		return 1;
-	}
-	else if (!strcasecmp(end, "M")) {
-		*val *= 1000 * 1000;
-		return 1;
-	}
-	else if (!strcasecmp(end, "G")) {
-		*val *= 1000 * 1000 * 1000;
-		return 1;
-	}
-	return 0;
-}
-
-/**
 	Get a value for a given key
 
 	\param key key to search for
@@ -422,8 +395,6 @@ static int parse_long(const char *value, long *ret)
 		char *end;
 		long val = strtol(value, &end, 0);
 		unsigned long factor = 1;
-		if (!parse_unit_factor(end, &factor))
-			return 0;
 		*ret = val * factor;
 		return 1;
 	}
@@ -442,8 +413,6 @@ static int parse_unsigned_long(const char *value, unsigned long *ret)
 	if (value && *value) {
 		char *end;
 		unsigned long val = strtoul(value, &end, 0);
-		if (!parse_unit_factor(end, &val))
-			return 0;
 		*ret = val;
 		return 1;
 	}
@@ -463,8 +432,6 @@ static int parse_double(const char *value, double *ret)
 		char *end;
 		double val = strtof(value, &end);
 		unsigned long factor = 1;
-		if (!parse_unit_factor(end, &factor)) 
-			return 0;
 		*ret = val * factor;
 		return 1;
 	}
