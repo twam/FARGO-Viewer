@@ -207,6 +207,7 @@ int FARGO::loadTimestep(unsigned int timestep)
 
 	FILE *fd;
 	char *filename;
+	bool foundTimestep = false;
 
 	double* newPlanetPositions = (double*)malloc(NPlanets*3*sizeof(double));
 	double* newPlanetVelocities = (double*)malloc(NPlanets*3*sizeof(double));
@@ -230,20 +231,25 @@ int FARGO::loadTimestep(unsigned int timestep)
 		filename = NULL;
 
 		char buffer[1024];
-		for (unsigned int l = 0; l <= timestep; ++l) {
+
+		while (!feof(fd)) {
 			if (fgets(buffer, 1024, fd) == NULL) {
 				fclose(fd);
 				return -1;
 			}
+
+			unsigned int timestepFile;
+			sscanf(buffer, "%u %lf %lf %lf %lf", &timestepFile, &newPlanetPositions[i*3+0], &newPlanetPositions[i*3+1], &newPlanetVelocities[i*3+0], &newPlanetVelocities[i*3+1]);
+			
+			if (timestepFile == timestep) {
+				foundTimestep = true;
+				break;
+			}
 		}
 		fclose(fd);
 
-		unsigned int timestepFile;
-		sscanf(buffer, "%u %lf %lf %lf %lf", &timestepFile, &newPlanetPositions[i*3+0], &newPlanetPositions[i*3+1], &newPlanetVelocities[i*3+0], &newPlanetVelocities[i*3+1]);
-
-		if (timestepFile != timestep) {
-			fprintf(stderr, "Timestep does not matched with file: %u != %u\n", timestep, timestepFile);
-			fprintf(stderr, "Line was '%s'\n",buffer);
+		if (!foundTimestep) {
+			fprintf(stderr, "Timestep %u was not in file!\n", timestep);
 			return -3;
 		}
 	}
