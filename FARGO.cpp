@@ -230,17 +230,19 @@ int FARGO::loadTimestep(unsigned int timestep)
 		delete [] filename;
 		filename = NULL;
 
-		char buffer[1024];
-
 		while (!feof(fd)) {
-			if (fgets(buffer, 1024, fd) == NULL) {
-				fclose(fd);
-				return -1;
+			unsigned int timestepFile;
+			if (fscanf(fd, "%u %lf %lf %lf %lf %*f %*f %*f %*f %*f %*f %*f %*f %*f %*f",
+					&timestepFile,
+					&newPlanetPositions[i*3+0],
+					&newPlanetPositions[i*3+1],
+					&newPlanetVelocities[i*3+0],
+					&newPlanetVelocities[i*3+1]
+					)== EOF) {
+				fprintf(stderr, "File ended unexpected\n");
+				break;
 			}
 
-			unsigned int timestepFile;
-			sscanf(buffer, "%u %lf %lf %lf %lf", &timestepFile, &newPlanetPositions[i*3+0], &newPlanetPositions[i*3+1], &newPlanetVelocities[i*3+0], &newPlanetVelocities[i*3+1]);
-			
 			if (timestepFile == timestep) {
 				foundTimestep = true;
 				break;
