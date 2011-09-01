@@ -163,8 +163,8 @@ int FARGO::loadFromFile(const char* filename)
 
 			// this is not really needed (just load timestep 0);
 			planetPositions[(NPlanets-1)*3+0] = semi_major_axis*(1.0+eccentricity);
-			planetPositions[(NPlanets-1)*3+1] = 0;
-			planetPositions[(NPlanets-1)*3+2] = 0;
+			planetPositions[(NPlanets-1)*3+1] = 0.0;
+			planetPositions[(NPlanets-1)*3+2] = 0.0;
 			planetVelocities[(NPlanets-1)*3+0] = 0;
 			planetVelocities[(NPlanets-1)*3+1] = sqrt(1*(1.0+mass)/semi_major_axis)*sqrt( (1.0-eccentricity)/(1.0+eccentricity));
 			planetVelocities[(NPlanets-1)*3+2] = 0;
@@ -211,7 +211,15 @@ int FARGO::loadTimestep(unsigned int timestep)
 
 	double* newPlanetPositions = (double*)malloc(NPlanets*3*sizeof(double));
 	double* newPlanetVelocities = (double*)malloc(NPlanets*3*sizeof(double));
+
+	newPlanetPositions[0] = 0.0;
+	newPlanetPositions[1] = 0.0;
+	newPlanetPositions[2] = 0.0;
 	
+	newPlanetVelocities[0] = 0.0;
+	newPlanetVelocities[1] = 0.0;
+	newPlanetVelocities[1] = 0.0;
+
 	for (unsigned int i = 1; i < NPlanets; ++i) {
 		filename = new char[strlen(outputDirectory)+1+10+(unsigned int)(log(NPlanets)/log(10)+1)];
 		
