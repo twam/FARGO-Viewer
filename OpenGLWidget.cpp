@@ -139,12 +139,12 @@ void OpenGLWidget::initializeGL()
 	glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
 	glDepthFunc(GL_LEQUAL);
 
-		
-	GLenum err = glewInit();
+/*	GLenum err = glewInit();
 	if (GLEW_OK != err) {
-		/* Problem: glewInit failed, something is seriously wrong. */
+		// Problem: glewInit failed, something is seriously wrong.
 		fprintf(stderr, "Error: %s\n", glewGetErrorString(err));
 	}
+*/
 
 	initSky();
 
@@ -252,8 +252,8 @@ void OpenGLWidget::initOrbits()
 		double semi_minor_axis = semi_major_axis * sqrt(1.0 -pow2(eccentricity));
 
 		for (unsigned int j = 0; j < orbitsDetailLevel; ++j) {
-			bufferVertices[((i-1)*3*orbitsDetailLevel)+3*j+0] = eccentricity*semi_major_axis + semi_major_axis*sin(2.0*M_PI/(float)orbitsDetailLevel*(float)j);
-			bufferVertices[((i-1)*3*orbitsDetailLevel)+3*j+1] = semi_minor_axis*cos(2.0*M_PI/(float)orbitsDetailLevel*(float)j);
+			bufferVertices[((i-1)*3*orbitsDetailLevel)+3*j+0] = eccentricity*semi_major_axis + semi_major_axis*sin(2.0*M_PI/(float)(orbitsDetailLevel-1)*(float)j);
+			bufferVertices[((i-1)*3*orbitsDetailLevel)+3*j+1] = semi_minor_axis*cos(2.0*M_PI/(float)(orbitsDetailLevel-1)*(float)j);
 			bufferVertices[((i-1)*3*orbitsDetailLevel)+3*j+2] = 0.0;
 		}
 	}
