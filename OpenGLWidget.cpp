@@ -132,17 +132,16 @@ void OpenGLWidget::initializeGL()
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
 
-	glClearColor(0.0, 0.0, 0.0, 0.0);
+	glClearColor(0.0, 0.0, 0.0, 1.0);
 
 	glShadeModel(GL_SMOOTH);
 
 	glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
 	glDepthFunc(GL_LEQUAL);
 
-		
 	GLenum err = glewInit();
 	if (GLEW_OK != err) {
-		/* Problem: glewInit failed, something is seriously wrong. */
+		// Problem: glewInit failed, something is seriously wrong.
 		fprintf(stderr, "Error: %s\n", glewGetErrorString(err));
 	}
 
@@ -163,7 +162,11 @@ void OpenGLWidget::resizeGL(int width, int height)
 
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
-	gluPerspective(60.0f, (GLfloat)width/(GLfloat)height, 0.1f, 500.0f);
+
+	GLfloat nearZ = 0.1f;
+	GLfloat farZ = 1000.0f;
+
+	gluPerspective(60.0f, (GLfloat)width/(GLfloat)height, nearZ, farZ);
 	glMatrixMode(GL_MODELVIEW);
 }
 
