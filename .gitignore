@@ -2,5 +2,7 @@ moc_*.h
 moc_*.cpp
 Makefile
 FargoViewer
+FargoViewer.app
 *.o
 *~
+.DS_store
