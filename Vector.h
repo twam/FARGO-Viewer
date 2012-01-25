@@ -38,8 +38,10 @@ class Vector
 		~Vector();
 
 		// entry operators
+/*		operators equivalent to const T*...
 		inline T& operator[](unsigned int i) { return entries[i]; }
 		inline T operator[](unsigned int i) const { return entries[i]; }
+*/
 		inline T& operator()(unsigned int i) { return entries[i]; }
 		inline T operator()(unsigned int i) const { return entries[i]; }
 		inline operator const T*(void) const { return entries; }

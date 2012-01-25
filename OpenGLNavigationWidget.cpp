@@ -132,9 +132,9 @@ void OpenGLNavigationWidget::updateCameraRotationMatrix()
 	cameraRotationMatrix(2,1) = cameraUp(2);
 	cameraRotationMatrix(3,1) = 0.0;
 
-	cameraRotationMatrix(0,2) = -(cameraForward[0]);
-	cameraRotationMatrix(1,2) = -(cameraForward[1]);
-	cameraRotationMatrix(2,2) = -(cameraForward[2]);
+	cameraRotationMatrix(0,2) = -(cameraForward(0));
+	cameraRotationMatrix(1,2) = -(cameraForward(1));
+	cameraRotationMatrix(2,2) = -(cameraForward(2));
 	cameraRotationMatrix(3,2) = 0.0;
 
 	cameraRotationMatrix(0,3) = 0.0;
