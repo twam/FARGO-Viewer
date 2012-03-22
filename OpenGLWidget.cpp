@@ -139,11 +139,13 @@ void OpenGLWidget::initializeGL()
 	glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
 	glDepthFunc(GL_LEQUAL);
 
+
 	GLenum err = glewInit();
 	if (GLEW_OK != err) {
 		// Problem: glewInit failed, something is seriously wrong.
 		fprintf(stderr, "Error: %s\n", glewGetErrorString(err));
 	}
+
 
 	initSky();
 
@@ -186,7 +188,7 @@ void OpenGLWidget::renderPlanets()
 		glBindTexture(GL_TEXTURE_2D, textures[0]);
 		gluQuadricTexture(quadric,true);
 		glMaterialfv(GL_FRONT, GL_EMISSION, mat_emission);
-		gluSphere(quadric,0.1,32,32);
+		gluSphere(quadric,simulation->getPlanetRadius(i)[0],32,32);
 		glMaterialfv(GL_FRONT, GL_EMISSION, no_mat);
 		gluDeleteQuadric(quadric);
 		glBindTexture(GL_TEXTURE_2D, 0);
@@ -827,13 +829,13 @@ void OpenGLWidget::renderKey()
 			glEnd();
 
 			double value = (float)(maxTics-pos)/(float)(maxTics)*(maximumValue-minimumValue)+minimumValue;
-			
+
 			int a = trunc(log10(fabs(value)));
 			double b = value/pow(10.0,a);
 
 			QString bStr = QString("%1\x95" "10").arg(b,0,'f',1);
 			QString aStr = QString("%1").arg(a);
-			
+
 			if (value != 0) {
 				renderText(width()-marginRight+7.0, marginTop+(double)fontSize/2.0+keyHeight*(GLfloat)pos/(GLfloat)maxTics, bStr ,fontNormal);
 				renderText(width()-marginRight+7.0+fontMetricsNormal.width(bStr)+1, marginTop-(double)fontSize/2.0+(double)fontSize/2.0+keyHeight*(GLfloat)pos/(GLfloat)maxTics, aStr ,fontScript);
@@ -881,7 +883,7 @@ void OpenGLWidget::paintGL()
 
 	if (showPlanets)
 		renderPlanets();
-	
+
 	if (showDiskBorder)
 		renderDiskBorder();
 
@@ -993,7 +995,7 @@ void OpenGLWidget::setLogarithmic(bool value)
 void OpenGLWidget::setMinimumValue(double value)
 {
 	minimumValue = value;
-	
+
 	if (minimumValue > maximumValue)
 		maximumValue = minimumValue;
 

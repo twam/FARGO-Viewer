@@ -1,7 +1,7 @@
 #ifndef _OPENGLWIDGET_H_
 #define _OPENGLWIDGET_H_
 
-//#include <GL/glew.h>
+#include <GL/glew.h>
 #include "OpenGLNavigationWidget.h"
 #include "Simulation.h"
 #include "Palette.h"
@@ -17,9 +17,9 @@ class OpenGLWidget : public OpenGLNavigationWidget
 		OpenGLWidget(QWidget *parent);
 		~OpenGLWidget();
 		void setSimulation(Simulation *simulation);
-		
+
 		inline Palette* getPalette() { return palette; }
-		
+
 		void setLogarithmic(bool value);
 		inline bool getLogarithmic() const { return logarithmicScale; }
 		void setMinimumValue(double value);

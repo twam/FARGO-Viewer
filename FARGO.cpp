@@ -20,7 +20,7 @@ FARGO::FARGO()
 	planetPositions = NULL;
 	planetVelocities = NULL;
 	planetMasses = NULL;
-	
+
 	if (version == FARGO_TWAM) {
 		readGhostCells = false;
 	}
@@ -35,10 +35,11 @@ FARGO::~FARGO()
 	free(planetPositions);
 	free(planetVelocities);
 	free(planetMasses);
+	free(planetRadii);
 
 	delete [] radii;
 
-	if (quantity != NULL) 
+	if (quantity != NULL)
 		delete [] quantity;
 }
 
@@ -46,7 +47,7 @@ int FARGO::loadFromFile(const char* filename)
 {
 	char buffer[512];
 	FILE *fd;
-	
+
 	configFilename = new char[strlen(filename)+1];
 	strcpy(configFilename, filename);
 
@@ -61,7 +62,7 @@ int FARGO::loadFromFile(const char* filename)
 	NRadial = config::value_as_unsigned_int("Nrad");
 	NAzimuthal = config::value_as_unsigned_int("Nsec");
 	currentTimestep = 0;
-	
+
 	if (!readGhostCells) {
 		NRadial -= 2;
 	}
@@ -76,7 +77,7 @@ int FARGO::loadFromFile(const char* filename)
 	// add ending / to output directory if neccessary
 	if (outputDirectory[strlen(outputDirectory)] != '/') {
 		unsigned int pos = strlen(outputDirectory);
-		outputDirectory[pos] = '/'; 
+		outputDirectory[pos] = '/';
 		outputDirectory[pos+1] = 0;
 	}
 
@@ -86,7 +87,7 @@ int FARGO::loadFromFile(const char* filename)
 	} else {
 		planetConfigFilename = NULL;
 	}
-	
+
 	delete [] temp;
 
 	config::clear_config();
@@ -127,6 +128,7 @@ int FARGO::loadFromFile(const char* filename)
 	planetPositions = (double*)malloc(3*sizeof(double));
 	planetVelocities = (double*)malloc(3*sizeof(double));
 	planetMasses = (double*)malloc(1*sizeof(double));
+	planetRadii = (double*)malloc(1*sizeof(double));
 	// planet 0 is sun, positon (0,0,0)
 	planetPositions[0] = 0.0;
 	planetPositions[1] = 0.0;
@@ -135,6 +137,7 @@ int FARGO::loadFromFile(const char* filename)
 	planetVelocities[1] = 0.0;
 	planetVelocities[2] = 0.0;
 	planetMasses[0] = 1.0;
+	planetRadii[0] = config::value_as_double_default("StarRadius", 0.009304813);
 
 	if (planetConfigFilename != NULL) {
 		fd = fopen(planetConfigFilename, "r");
@@ -145,11 +148,15 @@ int FARGO::loadFromFile(const char* filename)
 		}
 		// read line by line
 		while (fgets(buffer, sizeof(buffer), fd) != NULL) {
-			char name[80], feeldisk[5], feelother[5];
-			double semi_major_axis, mass, acc, eccentricity;
+			char name[80], feeldisk[5], feelother[5], irradiate[5];
+			double semi_major_axis, mass, acc, eccentricity, radius, temperature, phi;
 
 			// try to cut line into pieces
-			sscanf(buffer, "%80s %lf %lf %lf %5s %5s %lf", name, &semi_major_axis, &mass, &acc, feeldisk, feelother, &eccentricity);
+			int num_args = sscanf(buffer, "%80s %lf %lf %lf %5s %5s %lf %lf %lf %5s %lf", name, &semi_major_axis, &mass, &acc, feeldisk, feelother, &eccentricity, &radius, &temperature, irradiate, &phi);
+
+			if (num_args < 8) {
+				radius = 0.009304813;
+			}
 
 			// check if this line is a comment
 			if (name[0] == '#')
@@ -160,6 +167,7 @@ int FARGO::loadFromFile(const char* filename)
 			planetPositions = (double*)realloc(planetPositions, NPlanets*3*sizeof(double));
 			planetVelocities = (double*)realloc(planetVelocities, NPlanets*3*sizeof(double));
 			planetMasses = (double*)realloc(planetMasses, NPlanets*1*sizeof(double));
+			planetRadii = (double*)realloc(planetRadii, NPlanets*1*sizeof(double));
 
 			// this is not really needed (just load timestep 0);
 			planetPositions[(NPlanets-1)*3+0] = semi_major_axis*(1.0+eccentricity);
@@ -169,6 +177,7 @@ int FARGO::loadFromFile(const char* filename)
 			planetVelocities[(NPlanets-1)*3+1] = sqrt(1*(1.0+mass)/semi_major_axis)*sqrt( (1.0-eccentricity)/(1.0+eccentricity));
 			planetVelocities[(NPlanets-1)*3+2] = 0;
 			planetMasses[(NPlanets-1)] = mass;
+			planetRadii[(NPlanets-1)] = radius;
 		}
 
 		fclose(fd);
@@ -180,7 +189,7 @@ int FARGO::loadFromFile(const char* filename)
 		sprintf(temp, "%s/Quantities.dat", outputDirectory);
 		fd = fopen(temp, "r");
 		delete [] temp;
-	
+
 		// check in file if exists
 		if (fd != NULL) {
 			unsigned int line = 0;
@@ -215,20 +224,20 @@ int FARGO::loadTimestep(unsigned int timestep)
 	newPlanetPositions[0] = 0.0;
 	newPlanetPositions[1] = 0.0;
 	newPlanetPositions[2] = 0.0;
-	
+
 	newPlanetVelocities[0] = 0.0;
 	newPlanetVelocities[1] = 0.0;
 	newPlanetVelocities[1] = 0.0;
 
 	for (unsigned int i = 1; i < NPlanets; ++i) {
 		filename = new char[strlen(outputDirectory)+1+10+(unsigned int)(log(NPlanets)/log(10)+1)];
-		
+
 		if (version == FARGO_TWAM) {
 			sprintf(filename, "%splanet%u.dat", outputDirectory, i);
 		} else {
 			sprintf(filename, "%splanet%u.dat", outputDirectory, i-1);
 		}
-		
+
 		fd = fopen(filename,"r");
 		if (fd == NULL) {
 			fprintf(stderr, "Could not open '%s'.\n", filename);
@@ -308,7 +317,7 @@ int FARGO::loadTimestep(unsigned int timestep)
 		temp = planetVelocities;
 		planetVelocities = newPlanetVelocities;
 		free(temp);
-	
+
 		currentTimestep = timestep;
 
 		emit dataUpdated();
@@ -325,7 +334,7 @@ int FARGO::loadTimestep(unsigned int timestep)
 	\param scalar is this a scalar or vector grid
 */
 int FARGO::loadGrid(double* dest, const char* filename, bool scalar)
-{	
+{
 	FILE *fd = fopen(filename, "rb");
 	if (fd == NULL) {
 		fprintf(stderr, "Could not open '%s'!\n", filename);
@@ -368,9 +377,9 @@ int FARGO::loadGrid(double* dest, const char* filename, bool scalar)
 				if (fread(dest, sizeof(double), (NRadial+1)*NAzimuthal, fd)<(NRadial+1)*NAzimuthal) {
 					fprintf(stderr, "Error while reading '%s' (%lu bytes).\n", filename,(NRadial+1)*NAzimuthal*sizeof(double));
 					goto loadGrid_cleanUp;
-				}			
+				}
 				break;
-				
+
 			default:
 				if (fread(dest, sizeof(double), (NRadial)*NAzimuthal, fd)<(NRadial)*NAzimuthal) {
 					fprintf(stderr, "Error while reading '%s' (%lu bytes).\n", filename,(NRadial)*NAzimuthal*sizeof(double));
@@ -378,7 +387,7 @@ int FARGO::loadGrid(double* dest, const char* filename, bool scalar)
 				}
 				break;
 		}
-			
+
 	}
 
 loadGrid_cleanUp:
@@ -420,13 +429,13 @@ double FARGO::getMaximumValue(void) const {
 			}
 		}
 	}
-	
+
 	return maximum;
 }
 
 unsigned int FARGO::getNumberOfPlanets() const
 {
-	return NPlanets; 
+	return NPlanets;
 }
 
 const double* FARGO::getPlanetPosition(unsigned int number) const
@@ -442,6 +451,11 @@ const double* FARGO::getPlanetVelocity(unsigned int number) const
 const double* FARGO::getPlanetMass(unsigned int number) const
 {
 	return &planetMasses[number];
+}
+
+const double* FARGO::getPlanetRadius(unsigned int number) const
+{
+	return &planetRadii[number];
 }
 
 unsigned int FARGO::getCurrentTimestep() const

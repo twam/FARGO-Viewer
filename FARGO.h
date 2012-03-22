@@ -21,6 +21,7 @@ class FARGO : public Simulation
 		const double* getPlanetPosition(unsigned int number) const;
 		const double* getPlanetVelocity(unsigned int number) const;
 		const double* getPlanetMass(unsigned int number) const;
+		const double* getPlanetRadius(unsigned int number) const;
 		int loadTimestep(unsigned int timestep);
 		unsigned int getCurrentTimestep() const;
 		unsigned int getLastTimeStep() const;
@@ -53,6 +54,7 @@ class FARGO : public Simulation
 		double* planetPositions;
 		double* planetVelocities;
 		double* planetMasses;
+		double* planetRadii;
 		double* radii;
 		double* quantity;
 

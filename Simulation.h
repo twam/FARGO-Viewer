@@ -25,6 +25,7 @@ class Simulation : public QObject
 		virtual const double* getPlanetPosition(unsigned int number) const = 0;
 		virtual const double* getPlanetVelocity(unsigned int number) const = 0;
 		virtual const double* getPlanetMass(unsigned int number) const = 0;
+		virtual const double* getPlanetRadius(unsigned int number) const = 0;
 		virtual int loadTimestep(unsigned int timestep) = 0;
 		virtual unsigned int getCurrentTimestep() const = 0;
 		virtual unsigned int getLastTimeStep() const = 0;
