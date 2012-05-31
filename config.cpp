@@ -262,7 +262,8 @@ static int get_value(char *key, unsigned int len)
 			return -1;
 	}
 
-	add_to_config_list(key, value);
+	if (value != NULL)
+		add_to_config_list(key, value);
 
 	return 0;
 }
