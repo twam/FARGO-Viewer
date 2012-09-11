@@ -431,7 +431,7 @@ static int parse_double(const char *value, double *ret)
 {
 	if (value && *value) {
 		char *end;
-		double val = strtof(value, &end);
+		double val = strtod(value, &end);
 		unsigned long factor = 1;
 		*ret = val * factor;
 		return 1;
