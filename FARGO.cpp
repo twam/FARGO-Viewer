@@ -17,9 +17,15 @@ FARGO::FARGO()
 	quantityType = DENSITY;
 	quantity = NULL;
 	radii = NULL;
+
 	planetPositions = NULL;
 	planetVelocities = NULL;
 	planetMasses = NULL;
+	planetRadii = NULL;
+
+	particlePositions = NULL;
+	particleVelocities = NULL;
+	particleMasses = NULL;
 
 	if (version == FARGO_TWAM) {
 		readGhostCells = false;
@@ -36,6 +42,10 @@ FARGO::~FARGO()
 	free(planetVelocities);
 	free(planetMasses);
 	free(planetRadii);
+
+	free(particlePositions);
+	free(particleVelocities);
+	free(particleMasses);
 
 	delete [] radii;
 
@@ -90,8 +100,6 @@ int FARGO::loadFromFile(const char* filename)
 
 	delete [] temp;
 
-	config::clear_config();
-
 	// load radii
 	temp = new char[strlen(outputDirectory)+1+13];
 	sprintf(temp, "%s/used_rad.dat", outputDirectory);
@@ -137,7 +145,8 @@ int FARGO::loadFromFile(const char* filename)
 	planetVelocities[1] = 0.0;
 	planetVelocities[2] = 0.0;
 	planetMasses[0] = 1.0;
-	planetRadii[0] = config::value_as_double_default("StarRadius", 0.009304813);
+//	planetRadii[0] = config::value_as_double_default("StarRadius", 0.009304813);
+	planetRadii[0] = config::value_as_double_default("StarRadius", 0.009304813*10);
 
 	if (planetConfigFilename != NULL) {
 		fd = fopen(planetConfigFilename, "r");
@@ -155,7 +164,7 @@ int FARGO::loadFromFile(const char* filename)
 			int num_args = sscanf(buffer, "%80s %lf %lf %lf %5s %5s %lf %lf %lf %5s %lf", name, &semi_major_axis, &mass, &acc, feeldisk, feelother, &eccentricity, &radius, &temperature, irradiate, &phi);
 
 			if (num_args < 8) {
-				radius = 0.009304813;
+				radius = 0.009304813*10;
 			}
 
 			// check if this line is a comment
@@ -183,6 +192,14 @@ int FARGO::loadFromFile(const char* filename)
 		fclose(fd);
 	}
 
+	// load particles
+	HasParticles = config::value_as_bool_default("IntegrateParticles", false);
+	NParticles = config::value_as_unsigned_int_default("NumberOfParticles", 0);
+
+	particlePositions = (double*)malloc(2*NParticles*sizeof(double));
+	particleVelocities = (double*)malloc(2*NParticles*sizeof(double));
+	particleMasses = (double*)malloc(NParticles*sizeof(double));
+
 	// check for last timestep
 	if (version == FARGO_TWAM) {
 		temp = new char[strlen(outputDirectory)+1+15];
@@ -201,6 +218,8 @@ int FARGO::loadFromFile(const char* filename)
 			fclose(fd);
 		}
 	}
+
+	config::clear_config();
 
 	loadTimestep(0);
 
@@ -271,6 +290,44 @@ int FARGO::loadTimestep(unsigned int timestep)
 			fprintf(stderr, "Timestep %u was not in file!\n", timestep);
 			return -3;
 		}
+	}
+
+	// read particles
+	if (HasParticles) {
+		char *filename;
+		if (asprintf(&filename, "%s/particles%u.dat", outputDirectory, timestep)<0) {
+			fprintf(stderr, "Not enough memory!\n");
+			exit(EXIT_FAILURE);
+		}
+
+		FILE *fd = fopen(filename, "r");
+
+		if (fd == NULL) {
+			fprintf(stderr, "Could not open '%s'.\n", filename);
+			return -1;
+		}
+
+		for (unsigned int i = 0; i < NParticles; ++i) {
+			size_t count = 0;
+
+			fseek(fd, 8, SEEK_CUR);
+			count += fread(&particlePositions[i*2+0], sizeof(double), 1, fd);
+			count += fread(&particlePositions[i*2+1], sizeof(double), 1, fd);
+			count += fread(&particleVelocities[i*2+0], sizeof(double), 1, fd);
+			count += fread(&particleVelocities[i*2+1], sizeof(double), 1, fd);
+			count += fread(&particleMasses[i], sizeof(double), 1, fd);
+			fseek(fd, 16, SEEK_CUR);
+
+			printf("%u: %lf,%lf\n", i, particlePositions[i*2+0], particlePositions[i*2+1]);
+
+			if (count < 5) {
+				fprintf(stderr, "File '%s' ended to early!\n", filename);
+				exit(EXIT_FAILURE);
+			}
+		}
+
+		free(filename);
+		fclose(fd);
 	}
 
 	// read grid
@@ -490,4 +547,24 @@ const double* FARGO::getRadii() const {
 
 const double* FARGO::getQuantity() const {
 	return quantity;
+}
+
+unsigned int FARGO::getNumberOfParticles() const {
+	return NParticles;
+}
+
+const double* FARGO::getParticlePosition(unsigned int number) const {
+	return &particlePositions[number*2];
+}
+
+const double* FARGO::getParticleVelocity(unsigned int number) const {
+	return &particleVelocities[number*2];
+}
+
+const double* FARGO::getParticleMass(unsigned int number) const {
+	return &particleMasses[number];
+}
+
+bool FARGO::getHasParticles() const {
+	return HasParticles;
 }

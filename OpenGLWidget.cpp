@@ -1,5 +1,6 @@
 #include "OpenGLWidget.h"
 #include "util.h"
+#include <GL/glu.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
@@ -197,6 +198,28 @@ void OpenGLWidget::renderPlanets()
 	glDisable(GL_LIGHTING);
 }
 
+void OpenGLWidget::renderParticles()
+{
+	if (simulation == NULL)
+		return;
+
+	glEnable(GL_LIGHTING);
+	for (unsigned int i = 0; i < simulation->getNumberOfParticles(); ++i) {
+		glPushMatrix();
+		glTranslated(simulation->getParticlePosition(i)[0],simulation->getParticlePosition(i)[1],0);
+		GLUquadricObj* quadric = gluNewQuadric();
+		//glBindTexture(GL_TEXTURE_2D, textures[0]);
+		//gluQuadricTexture(quadric,true);
+		//glMaterialfv(GL_FRONT, GL_EMISSION, mat_emission);
+		gluSphere(quadric,0.1,32,32);
+		//glMaterialfv(GL_FRONT, GL_EMISSION, no_mat);
+		//gluDeleteQuadric(quadric);
+		//glBindTexture(GL_TEXTURE_2D, 0);
+		glPopMatrix();
+	}
+	glDisable(GL_LIGHTING);
+}
+
 void OpenGLWidget::initEverything() {
 	if (!initDone) {
 		// clean up first (if everything should be left over)
@@ -250,7 +273,7 @@ void OpenGLWidget::initOrbits()
 		// distance
 		double d = sqrt(pow2(x)+pow2(y));
 		// Runge-Lenz vector A = (p x L) - m * G * m * M * r/|r|;
-		double A_x =  j/mass * (1.0+mass) * v_y - 1.0 * 1.0 * pow2(1.0+mass) * x/d; 
+		double A_x =  j/mass * (1.0+mass) * v_y - 1.0 * 1.0 * pow2(1.0+mass) * x/d;
 		double A_y = -j/mass * (1.0+mass) * v_x - 1.0 * 1.0 * pow2(1.0+mass) * y/d;
 		double eccentricity = sqrt(pow2(A_x) + pow2(A_y))/(1.0*1.0*pow2(1.0+mass));
 		double semi_major_axis = pow2(j/mass) / (1.0 * (1.0+mass)) / (1.0 - pow2(eccentricity));
@@ -341,7 +364,7 @@ void OpenGLWidget::renderRocheLobe()
 	// distance
 	//double d = sqrt(pow2(x)+pow2(y));
 	// Runge-Lenz vector A = (p x L) - m * G * m * M * r/|r|;
-	//double A_x =  j/mass * (1.0+mass) * v_y - 1.0 * 1.0 * pow2(1.0+mass) * x/d; 
+	//double A_x =  j/mass * (1.0+mass) * v_y - 1.0 * 1.0 * pow2(1.0+mass) * x/d;
 	//double A_y = -j/mass * (1.0+mass) * v_x - 1.0 * 1.0 * pow2(1.0+mass) * y/d;
 	//double eccentricity = sqrt(pow2(A_x) + pow2(A_y))/(1.0*1.0*pow2(1.0+mass));
 	//double semi_major_axis = pow2(j/mass) / (1.0 * (1.0+mass)) / (1.0 - pow2(eccentricity));
@@ -363,14 +386,14 @@ void OpenGLWidget::renderRocheLobe()
 		glVertex3fv(&rocheLobeVertices[3*j]);
 	}
 	glEnd();
-	
+
 	glDisable(GL_LINE_SMOOTH);
 }
 
 void OpenGLWidget::initDisk()
 {
 	unsigned int bufferSize;
-	
+
 	if (simulation == NULL)
 		return;
 
@@ -431,7 +454,7 @@ void OpenGLWidget::initDisk()
 
 	bufferSize = 3*((simulation->getNRadial()+1)*simulation->getNAzimuthal())*sizeof(GLfloat);
 	GLfloat *bufferNormals = (GLfloat*)malloc(bufferSize);
-	
+
 	for (unsigned int nRadial = 0; nRadial <= simulation->getNRadial(); ++nRadial) {
 		for (unsigned int nAzimuthal = 0; nAzimuthal < simulation->getNAzimuthal(); ++nAzimuthal) {
 			index =  nRadial * simulation->getNAzimuthal() + nAzimuthal;
@@ -452,7 +475,7 @@ void OpenGLWidget::initDisk()
 
 	bufferSize = 4*((simulation->getNRadial()+1)*simulation->getNAzimuthal())*sizeof(GLfloat);
 	GLfloat *bufferColors = (GLfloat*)malloc(bufferSize);
-	
+
 	for (unsigned int nRadial = 0; nRadial <= simulation->getNRadial(); ++nRadial) {
 		for (unsigned int nAzimuthal = 0; nAzimuthal < simulation->getNAzimuthal(); ++nAzimuthal) {
 			index =  nRadial * simulation->getNAzimuthal() + nAzimuthal;
@@ -462,12 +485,12 @@ void OpenGLWidget::initDisk()
 			bufferColors[4*index+3] = 1.0;
 		}
 	}
-	
+
 	glBufferData(GL_ARRAY_BUFFER, bufferSize, bufferColors, GL_STATIC_DRAW);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 
 	free(bufferColors);
-	
+
 }
 
 void OpenGLWidget::cleanUpDisk()
@@ -480,7 +503,7 @@ void OpenGLWidget::initGrid()
 {
 	if (simulation == NULL)
 		return;
-	
+
 	// nothing to be done here, as grid is already created by initDisk()
 }
 
@@ -544,8 +567,8 @@ void OpenGLWidget::renderDisk()
 	glDisableClientState(GL_VERTEX_ARRAY);
 	glDisableClientState(GL_NORMAL_ARRAY);
 	glDisableClientState(GL_COLOR_ARRAY);
-	
-	//glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);	
+
+	//glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
 	glPopMatrix();
 }
@@ -558,20 +581,20 @@ void OpenGLWidget::renderGrid()
 	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 	glEnable(GL_LINE_SMOOTH);
 	glPushMatrix();
-	
+
 	// activate arrays
 	glEnableClientState(GL_VERTEX_ARRAY);
 	glEnableClientState(GL_NORMAL_ARRAY);
-	
+
 	// bind VBOs and set data
 	glBindBuffer(GL_ARRAY_BUFFER, diskVerticesVBO);
 	glVertexPointer(3, GL_FLOAT, 0, 0);
 
 	glBindBuffer(GL_ARRAY_BUFFER, diskNormalsVBO);
 	glNormalPointer(GL_FLOAT, 0, 0);
-	
+
 	glColor3ub(0x80,0x80,0x80);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, diskIndicesVBO);	
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, diskIndicesVBO);
 	glDrawElements(GL_QUADS, 4*((simulation->getNRadial())*simulation->getNAzimuthal()), GL_UNSIGNED_INT, 0);
 
 	// bind with 0, so, switch back to normal pointer operation
@@ -581,9 +604,9 @@ void OpenGLWidget::renderGrid()
 	glDisableClientState(GL_VERTEX_ARRAY);
 	glDisableClientState(GL_NORMAL_ARRAY);
 	glPopMatrix();
-	glDisable(GL_LINE_SMOOTH);	
+	glDisable(GL_LINE_SMOOTH);
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-	
+
 }
 
 void OpenGLWidget::diskColor(GLfloat* color, double value, double minValue, double maxValue, bool logarithmic)
@@ -702,7 +725,7 @@ void OpenGLWidget::renderSky()
 
 	// do camera rotation without translation, so stars appear with infinity distance
 	glLoadIdentity();
-	glMultMatrixd(cameraRotationMatrix);	
+	glMultMatrixd(cameraRotationMatrix);
 
 	glColor3f(1.0,1.0,1.0);
 	glPointSize(1.0);
@@ -796,7 +819,7 @@ void OpenGLWidget::renderKey()
 				renderText(width()-marginRight+7.0, marginTop+(double)fontSize/2.0+keyHeight*pos, QString("10"),fontNormal);
 				renderText(width()-marginRight+7.0+fontMetricsNormal.width("10")+1, marginTop-(double)fontSize/2.0+(double)fontSize/2.0+keyHeight*pos, QString("%1").arg(a),fontScript);
 			}
-			
+
 			b++;
 			if (b == 10) {
 				b = 1;
@@ -840,7 +863,7 @@ void OpenGLWidget::renderKey()
 				renderText(width()-marginRight+7.0, marginTop+(double)fontSize/2.0+keyHeight*(GLfloat)pos/(GLfloat)maxTics, bStr ,fontNormal);
 				renderText(width()-marginRight+7.0+fontMetricsNormal.width(bStr)+1, marginTop-(double)fontSize/2.0+(double)fontSize/2.0+keyHeight*(GLfloat)pos/(GLfloat)maxTics, aStr ,fontScript);
 			} else {
-				renderText(width()-marginRight+7.0, marginTop+(double)fontSize/2.0+keyHeight*(GLfloat)pos/(GLfloat)maxTics, QString("0") ,fontNormal);				
+				renderText(width()-marginRight+7.0, marginTop+(double)fontSize/2.0+keyHeight*(GLfloat)pos/(GLfloat)maxTics, QString("0") ,fontNormal);
 			}
 		}
 	}
@@ -883,6 +906,9 @@ void OpenGLWidget::paintGL()
 
 	if (showPlanets)
 		renderPlanets();
+
+	if (showParticles)
+		renderParticles();
 
 	if (showDiskBorder)
 		renderDiskBorder();
@@ -936,6 +962,12 @@ void OpenGLWidget::updateShowDiskBorder(bool value)
 void OpenGLWidget::updateShowPlanets(bool value)
 {
 	showPlanets = value;
+	update();
+}
+
+void OpenGLWidget::updateShowParticles(bool value)
+{
+	showParticles = value;
 	update();
 }
 

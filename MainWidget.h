@@ -81,6 +81,7 @@ class MainWidget : public QWidget
 		QAction* resetCameraAction;
 		QAction* showDiskAction;
 		QAction* showGridAction;
+		QAction* showParticlesAction;
 		QAction* showPlanetsAction;
 		QAction* showOrbitsAction;
 		QAction* showRocheLobeAction;
@@ -100,7 +101,7 @@ class MainWidget : public QWidget
 		QAction* quantityTemperatureAction;
 		QAction* quantityVRadialAction;
 		QAction* quantityVAzimuthalAction;
-		
+
 		QToolButton* playPauseButton;
 		QToolButton* stopButton;
 		QToolButton* forwardButton;
@@ -118,7 +119,7 @@ class MainWidget : public QWidget
 
 		QHBoxLayout* buttonsLayout;
 		QVBoxLayout* mainLayout;
-		
+
 		QTimer* timer;
 
 		QSettings* settings;

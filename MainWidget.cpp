@@ -172,7 +172,7 @@ void MainWidget::createMenu()
 
 	autoscaleAction = optionsMenu->addAction(tr("&Autoscale"));
 	connect(autoscaleAction, SIGNAL(triggered()), this, SLOT(triggeredAutoscale()));
-	
+
 	menuBar->addMenu(optionsMenu);
 
 	// quantity
@@ -206,7 +206,7 @@ void MainWidget::createMenu()
 
 	resetCameraAction = viewMenu->addAction(tr("&Reset Camera"));
 	connect(resetCameraAction, SIGNAL(triggered()), this, SLOT(triggeredResetCamera()));
-	
+
 	showDiskAction = viewMenu->addAction(tr("Show &Disk"));
 	showDiskAction->setCheckable(true);
 	showDiskAction->setChecked(true);
@@ -231,6 +231,12 @@ void MainWidget::createMenu()
 	openGLWidget->updateShowPlanets(true);
 	connect(showPlanetsAction, SIGNAL(toggled(bool)), openGLWidget, SLOT(updateShowPlanets(bool)));
 
+	showParticlesAction = viewMenu -> addAction(tr("Show Particles"));
+	showParticlesAction->setCheckable(true);
+	showParticlesAction->setChecked(true);
+	openGLWidget->updateShowParticles(true);
+	connect(showParticlesAction, SIGNAL(toggled(bool)), openGLWidget, SLOT(updateShowParticles(bool)));
+
 	showOrbitsAction = viewMenu->addAction(tr("Show &Orbits"));
 	showOrbitsAction->setCheckable(true);
 	showOrbitsAction->setChecked(true);
@@ -242,7 +248,7 @@ void MainWidget::createMenu()
 	showRocheLobeAction->setChecked(false);
 	openGLWidget->updateShowRocheLobe(false);
 	connect(showRocheLobeAction, SIGNAL(toggled(bool)), openGLWidget, SLOT(updateShowRocheLobe(bool)));
-	
+
 	showSkyAction = viewMenu->addAction(tr("Show &Sky"));
 	showSkyAction->setCheckable(true);
 	showSkyAction->setChecked(true);
@@ -525,7 +531,7 @@ void MainWidget::triggeredOpen()
 	loadSimulation(filename);
 }
 
-void MainWidget::loadSimulation(QString filename) 
+void MainWidget::loadSimulation(QString filename)
 {
 	if (filename.isNull()) {
 		delete simulation;
@@ -542,7 +548,7 @@ void MainWidget::loadSimulation(QString filename)
 			msgBox.setText(QString("Failed to open '%1'.").arg(filename));
 			msgBox.exec();
 		}
-	}	
+	}
 }
 
 void MainWidget::changedTimeline(int value)
@@ -628,7 +634,7 @@ void MainWidget::triggeredSetMinimumValue()
 		} else if (value > openGLWidget->getMaximumValue()) {
 			QMessageBox msgBox;
 			msgBox.setText(QString("Minimum value must smaller than maximum value!"));
-			msgBox.exec();			
+			msgBox.exec();
 		} else {
 			openGLWidget->setMinimumValue(value);
 			settings->setValue("minimumValue", openGLWidget->getMinimumValue());
@@ -649,7 +655,7 @@ void MainWidget::triggeredSetMaximumValue()
 		} else if (value < openGLWidget->getMinimumValue()) {
 			QMessageBox msgBox;
 			msgBox.setText(QString("Minimum value must greater than maximum value!"));
-			msgBox.exec();			
+			msgBox.exec();
 		} else {
 			openGLWidget->setMaximumValue(value);
 			settings->setValue("maximumValue", openGLWidget->getMaximumValue());

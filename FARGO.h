@@ -17,11 +17,21 @@ class FARGO : public Simulation
 		FARGO();
 		~FARGO();
 		int loadFromFile(const char* filename);
+
+		// planet stuff
 		unsigned int getNumberOfPlanets() const;
 		const double* getPlanetPosition(unsigned int number) const;
 		const double* getPlanetVelocity(unsigned int number) const;
 		const double* getPlanetMass(unsigned int number) const;
 		const double* getPlanetRadius(unsigned int number) const;
+
+		// particle stuff
+		unsigned int getNumberOfParticles() const;
+		const double* getParticlePosition(unsigned int number) const;
+		const double* getParticleVelocity(unsigned int number) const;
+		const double* getParticleMass(unsigned int number) const;
+		bool getHasParticles() const;
+
 		int loadTimestep(unsigned int timestep);
 		unsigned int getCurrentTimestep() const;
 		unsigned int getLastTimeStep() const;
@@ -38,7 +48,7 @@ class FARGO : public Simulation
 
 	private:
 		Version version;
-		
+
 		QuantityType quantityType;
 		bool readGhostCells;
 		char *configFilename;
@@ -50,11 +60,22 @@ class FARGO : public Simulation
 		unsigned int currentTimestep;
 		double rMin;
 		double rMax;
+
+		// planests
 		unsigned int NPlanets;
 		double* planetPositions;
 		double* planetVelocities;
 		double* planetMasses;
 		double* planetRadii;
+
+		// particles
+		bool HasParticles;
+		unsigned int NParticles;
+		double *particlePositions;
+		double *particleVelocities;
+		double *particleMasses;
+
+
 		double* radii;
 		double* quantity;
 

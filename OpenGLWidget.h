@@ -32,6 +32,7 @@ class OpenGLWidget : public OpenGLNavigationWidget
 		void updateShowGrid(bool value);
 		void updateShowDiskBorder(bool value);
 		void updateShowPlanets(bool value);
+		void updateShowParticles(bool value);
 		void updateShowOrbits(bool value);
 		void updateShowRocheLobe(bool value);
 		void updateShowSky(bool value);
@@ -52,7 +53,7 @@ class OpenGLWidget : public OpenGLNavigationWidget
 		bool initDone;
 		void initEverything();
 		void cleanUpEverything();
-	
+
 		// disk
 		bool showDisk;
 		GLuint diskVerticesVBO;
@@ -77,6 +78,10 @@ class OpenGLWidget : public OpenGLNavigationWidget
 		void cleanUpDiskBorder();
 		void renderDiskBorder();
 
+		// particles
+		bool showParticles;
+		void renderParticles();
+
 		// planets
 		bool showPlanets;
 		void renderPlanets();
@@ -95,7 +100,7 @@ class OpenGLWidget : public OpenGLNavigationWidget
 		unsigned int rocheLobeDetailLevel;
 		void initRocheLobe();
 		void renderRocheLobe();
-		
+
 		// sky
 		bool showSky;
 		double skyDistance;

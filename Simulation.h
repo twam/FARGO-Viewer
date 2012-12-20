@@ -21,11 +21,21 @@ class Simulation : public QObject
 		virtual ~Simulation();
 
 		virtual int loadFromFile(const char* filename) = 0;
+
+		// planet stuff
 		virtual unsigned int getNumberOfPlanets() const = 0;
 		virtual const double* getPlanetPosition(unsigned int number) const = 0;
 		virtual const double* getPlanetVelocity(unsigned int number) const = 0;
 		virtual const double* getPlanetMass(unsigned int number) const = 0;
 		virtual const double* getPlanetRadius(unsigned int number) const = 0;
+
+		// particle stuff
+		virtual unsigned int getNumberOfParticles() const = 0;
+		virtual const double* getParticlePosition(unsigned int number) const = 0;
+		virtual const double* getParticleVelocity(unsigned int number) const = 0;
+		virtual const double* getParticleMass(unsigned int number) const = 0;
+		virtual bool getHasParticles() const = 0;
+
 		virtual int loadTimestep(unsigned int timestep) = 0;
 		virtual unsigned int getCurrentTimestep() const = 0;
 		virtual unsigned int getLastTimeStep() const = 0;
