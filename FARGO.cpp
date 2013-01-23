@@ -316,9 +316,7 @@ int FARGO::loadTimestep(unsigned int timestep)
 			count += fread(&particleVelocities[i*2+0], sizeof(double), 1, fd);
 			count += fread(&particleVelocities[i*2+1], sizeof(double), 1, fd);
 			count += fread(&particleMasses[i], sizeof(double), 1, fd);
-			fseek(fd, 16, SEEK_CUR);
-
-			printf("%u: %lf,%lf\n", i, particlePositions[i*2+0], particlePositions[i*2+1]);
+			fseek(fd, 16+8, SEEK_CUR);
 
 			if (count < 5) {
 				fprintf(stderr, "File '%s' ended to early!\n", filename);
