@@ -1,6 +1,10 @@
 #include "OpenGLWidget.h"
 #include "util.h"
+#ifdef __APPLE__
+#include <OpenGL/OpenGL.h>
+#else
 #include <GL/glu.h>
+#endif
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
@@ -203,21 +207,14 @@ void OpenGLWidget::renderParticles()
 	if (simulation == NULL)
 		return;
 
-	glEnable(GL_LIGHTING);
-	for (unsigned int i = 0; i < simulation->getNumberOfParticles(); ++i) {
-		glPushMatrix();
-		glTranslated(simulation->getParticlePosition(i)[0],simulation->getParticlePosition(i)[1],0);
-		GLUquadricObj* quadric = gluNewQuadric();
-		//glBindTexture(GL_TEXTURE_2D, textures[0]);
-		//gluQuadricTexture(quadric,true);
-		//glMaterialfv(GL_FRONT, GL_EMISSION, mat_emission);
-		gluSphere(quadric,0.1,32,32);
-		//glMaterialfv(GL_FRONT, GL_EMISSION, no_mat);
-		//gluDeleteQuadric(quadric);
-		//glBindTexture(GL_TEXTURE_2D, 0);
-		glPopMatrix();
+	glColor3f(0.5,0.5,0.5);
+	glPointSize(2.0);
+	glBegin(GL_POINTS);
+	for (unsigned int i = 0; i < skyNumberOfObjects; ++i) {
+		glVertex3f(simulation->getParticlePosition(i)[0], simulation->getParticlePosition(i)[1], 0);
 	}
-	glDisable(GL_LIGHTING);
+	glEnd();
+
 }
 
 void OpenGLWidget::initEverything() {
