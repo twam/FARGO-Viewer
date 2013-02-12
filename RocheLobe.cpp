@@ -27,7 +27,7 @@ double calculateL1Point(double q)
 
 	// functions values ( derivative of rochePotential)
 	double fLeft  = a/(left*left) - b/((left-1.0)*(left-1.0)) - (left-b);
-	double fRight = a/(right*right) - b/((right-1.0)*(right-1.0)) - (right-b);
+	/*double fRight = a/(right*right) - b/((right-1.0)*(right-1.0)) - (right-b); */
 	double fCenter;
 
 	while ( fabs(right-left) > 1e-5 ) {
@@ -41,7 +41,7 @@ double calculateL1Point(double q)
 		
 		if (fLeft > 0.0) {
 			if (fCenter < 0.0) {
-				fRight = fCenter;
+				/* fRight = fCenter; */
 				right = center;
 			} else {
 				fLeft = fCenter;
@@ -49,7 +49,7 @@ double calculateL1Point(double q)
 			}
 		} else {
 			if (fCenter > 0.0) {
-				fRight = fCenter;
+				/* fRight = fCenter; */
 				right = center;
 			} else {
 				fLeft = fCenter;
@@ -72,7 +72,7 @@ double calculateRocheRadius(double q, double L1, double value, double phi)
 	double center;
 
 	// function values
-	double fOuter = rochePotential(q,outer*sin(phi),outer*cos(phi))-value;
+	/* double fOuter = rochePotential(q,outer*sin(phi),outer*cos(phi))-value; */
 	double fInner = rochePotential(q,inner*sin(phi),inner*cos(phi))-value;
 	double fCenter;
 	
@@ -87,7 +87,7 @@ double calculateRocheRadius(double q, double L1, double value, double phi)
 
 		if (fInner > 0.0) {
 			if (fCenter < 0.0) {
-				fOuter = fCenter;
+				/* fOuter = fCenter; */
 				outer = center;
 			} else {
 				fInner = fCenter;
@@ -95,7 +95,7 @@ double calculateRocheRadius(double q, double L1, double value, double phi)
 			}
 		} else {
 			if (fCenter > 0.0) {
-				fOuter = fCenter;
+				/* fOuter = fCenter; */
 				outer = center;
 			} else {
 				fInner = fCenter;
