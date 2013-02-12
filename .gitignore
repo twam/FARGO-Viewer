@@ -6,3 +6,4 @@ FargoViewer.app
 *.o
 *~
 .DS_store
+version.h

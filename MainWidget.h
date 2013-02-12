@@ -50,6 +50,7 @@ class MainWidget : public QWidget
 		void clickedDecreaseFps();
 		void triggeredOpen();
 		void triggeredExit();
+		void triggeredAbout();
 		void triggeredEditPalette();
 		void triggeredSetWindowSize();
 		void changedTimeline(int value);
@@ -71,13 +72,17 @@ class MainWidget : public QWidget
 		void createButtons();
 
 		QMenuBar* menuBar;
+
 		QMenu* fileMenu;
 		QMenu* quantityMenu;
 		QMenu* viewMenu;
 		QMenu* optionsMenu;
+		QMenu* helpMenu;
+
 		QActionGroup* quantityActionGroup;
 		QAction* exitAction;
 		QAction* openAction;
+		QAction* aboutAction;
 		QAction* resetCameraAction;
 		QAction* showDiskAction;
 		QAction* showGridAction;

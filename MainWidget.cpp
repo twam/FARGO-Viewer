@@ -10,6 +10,7 @@
 #include "Simulation.h"
 #include "FARGO.h"
 #include "util.h"
+#include "version.h"
 
 MainWidget::MainWidget(QWidget *parent)
 : QWidget(parent), simulation(NULL)
@@ -274,6 +275,15 @@ void MainWidget::createMenu()
 	connect(useMultisampling, SIGNAL(toggled(bool)), openGLWidget, SLOT(updateUseMultisampling(bool)));
 
 	menuBar->addMenu(viewMenu);
+
+	// help
+	helpMenu = new QMenu(tr("&Help"), this);
+
+	aboutAction = helpMenu->addAction(tr("About"));
+	connect(aboutAction, SIGNAL(triggered()), this, SLOT(triggeredAbout()));
+
+	menuBar->addMenu(helpMenu);
+
 }
 
 void MainWidget::createButtons()
@@ -523,6 +533,11 @@ void MainWidget::setSimulation(Simulation *simulation)
 void MainWidget::triggeredExit()
 {
 	close();
+}
+
+void MainWidget::triggeredAbout()
+{
+	QMessageBox::about(this, QString("About FARGO-Viewer"), QString("Version: ") + QString(git_version)+QString("\nURL: https://github.com/twam/FARGO-Viewer"));
 }
 
 void MainWidget::triggeredOpen()
