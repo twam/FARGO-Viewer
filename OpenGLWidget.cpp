@@ -210,7 +210,7 @@ void OpenGLWidget::renderParticles()
 	glColor3f(0.5,0.5,0.5);
 	glPointSize(2.0);
 	glBegin(GL_POINTS);
-	for (unsigned int i = 0; i < skyNumberOfObjects; ++i) {
+	for (unsigned int i = 0; i < simulation->getNumberOfParticles(); ++i) {
 		glVertex3f(simulation->getParticlePosition(i)[0], simulation->getParticlePosition(i)[1], 0);
 	}
 	glEnd();
