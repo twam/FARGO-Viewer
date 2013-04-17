@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <math.h>
 #include <float.h>
+#include <sys/stat.h>
 
 FARGO::FARGO()
 {
@@ -299,6 +300,16 @@ int FARGO::loadTimestep(unsigned int timestep)
 			fprintf(stderr, "Not enough memory!\n");
 			exit(EXIT_FAILURE);
 		}
+
+		// get filesize
+		struct stat filestatus;
+  		stat(filename, &filestatus);
+
+ 		// update number of particles and array sizes
+  		NParticles = filestatus.st_size/(9*8);
+		particlePositions = (double*)realloc(particlePositions, 2*NParticles*sizeof(double));
+		particleVelocities = (double*)realloc(particleVelocities, 2*NParticles*sizeof(double));
+		particleMasses = (double*)realloc(particleMasses, NParticles*sizeof(double));
 
 		FILE *fd = fopen(filename, "r");
 

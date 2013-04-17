@@ -232,10 +232,10 @@ void MainWidget::createMenu()
 	openGLWidget->updateShowPlanets(true);
 	connect(showPlanetsAction, SIGNAL(toggled(bool)), openGLWidget, SLOT(updateShowPlanets(bool)));
 
-	showParticlesAction = viewMenu -> addAction(tr("Show Particles"));
+	showParticlesAction = viewMenu -> addAction(tr("Show P&articles"));
 	showParticlesAction->setCheckable(true);
-	showParticlesAction->setChecked(true);
-	openGLWidget->updateShowParticles(true);
+	showParticlesAction->setChecked(false);
+	openGLWidget->updateShowParticles(false);
 	connect(showParticlesAction, SIGNAL(toggled(bool)), openGLWidget, SLOT(updateShowParticles(bool)));
 
 	showOrbitsAction = viewMenu->addAction(tr("Show &Orbits"));
@@ -252,8 +252,8 @@ void MainWidget::createMenu()
 
 	showSkyAction = viewMenu->addAction(tr("Show &Sky"));
 	showSkyAction->setCheckable(true);
-	showSkyAction->setChecked(true);
-	openGLWidget->updateShowSky(true);
+	showSkyAction->setChecked(false);
+	openGLWidget->updateShowSky(false);
 	connect(showSkyAction, SIGNAL(toggled(bool)), openGLWidget, SLOT(updateShowSky(bool)));
 
 	showTextAction = viewMenu->addAction(tr("Show &Text"));
