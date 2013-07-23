@@ -1,6 +1,7 @@
 #include "FARGO.h"
 #include "config.h"
 #include <string.h>
+#include <libgen.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
@@ -35,9 +36,9 @@ FARGO::FARGO()
 
 FARGO::~FARGO()
 {
-	delete [] configFilename;
-	delete [] outputDirectory;
-	delete [] planetConfigFilename;
+	free(configFilename);
+	free(outputDirectory);
+	free(planetConfigFilename);
 
 	free(planetPositions);
 	free(planetVelocities);
@@ -59,11 +60,12 @@ int FARGO::loadFromFile(const char* filename)
 	char buffer[512];
 	FILE *fd;
 
-	configFilename = new char[strlen(filename)+1];
+	free(configFilename);
+	configFilename = (char*)malloc(1+strlen(filename));
 	strcpy(configFilename, filename);
 
-	if (config::read_config_from_file(filename) == -1) {
-		fprintf(stderr, "Cannot read config file '%s'!\n", filename);
+	if (config::read_config_from_file(configFilename) == -1) {
+		fprintf(stderr, "Cannot read config file '%s'!\n", configFilename);
 		return -1;
 	}
 
@@ -78,28 +80,66 @@ int FARGO::loadFromFile(const char* filename)
 		NRadial -= 2;
 	}
 
-	char *temp = new char[strlen(filename)];
-	strncpy(temp, filename, (strrchr(filename,'/')-filename-2));
-	temp[(strrchr(filename,'/')-filename-2)] = 0;
+	// create a copy of filename as dirname may modify it
+	char *configFilenameCopy = (char*)malloc(1+strlen(configFilename));
+    strcpy(configFilenameCopy, configFilename);
 
-	outputDirectory = new char[strlen(temp)+strlen(config::value_as_string("OutputDir"))+2];
-	sprintf(outputDirectory,"%s%s",temp,config::value_as_string("OutputDir"));
+    char *temp = dirname(configFilenameCopy);
 
-	// add ending / to output directory if neccessary
-	if (outputDirectory[strlen(outputDirectory)] != '/') {
-		unsigned int pos = strlen(outputDirectory);
-		outputDirectory[pos] = '/';
-		outputDirectory[pos+1] = 0;
-	}
+    char *configDirname = (char*)malloc(1+strlen(temp));
+    strcpy(configDirname, temp);
+
+    // filename_copy is not needed anymore. releasing it may invalidate temp
+    free(configFilenameCopy);
+    temp = NULL;
+
+    // create temporary output directory
+    if (asprintf(&temp, "%s/%s", configDirname, config::value_as_string("OutputDir"))<0) {
+    	fprintf(stderr, "Not enough memory.");
+		exit(-1);
+    }
+
+    // create realpath of output directory
+    outputDirectory = realpath(temp, NULL);
+
+    // invalidate temp
+    free(temp);
+
+    // output directory could not be found!
+    if (outputDirectory == NULL) {
+    	// try again with ..
+	    if (asprintf(&temp, "%s/../%s", configDirname, config::value_as_string("OutputDir"))<0) {
+	    	fprintf(stderr, "Not enough memory.");
+			exit(-1);
+	    }
+
+	    // create realpath of output directory
+	    outputDirectory = realpath(temp, NULL);
+
+	    // invalidate temp
+	    free(temp);
+
+	    if (outputDirectory == NULL) {
+    		fprintf(stderr, "Output directory does not exist!");
+    		exit(-1);
+    	}
+    }
 
 	if ((config::key_exists("PLANETCONFIG")) && (strlen(config::value_as_string("PLANETCONFIG"))>0)) {
-		planetConfigFilename = new char[strlen(temp)+strlen(config::value_as_string("PLANETCONFIG"))+1];
-		sprintf(planetConfigFilename,"%s%s",temp, config::value_as_string("PLANETCONFIG"));
+	    // create temporary planet config
+	    if (asprintf(&temp, "%s/%s", configDirname, config::value_as_string("PLANETCONFIG"))<0) {
+	    	fprintf(stderr, "Not enough memory.");
+			exit(-1);
+	    }
+
+	    // create realpath of planet config file
+	    planetConfigFilename = realpath(temp, NULL);
+
+	    // invalidate temp
+	    free(temp);
 	} else {
 		planetConfigFilename = NULL;
 	}
-
-	delete [] temp;
 
 	// load radii
 	temp = new char[strlen(outputDirectory)+1+13];
@@ -343,25 +383,25 @@ int FARGO::loadTimestep(unsigned int timestep)
 	switch (quantityType) {
 		case DENSITY:
 			filename = new char[strlen(outputDirectory)+1+12+(unsigned int)(log(timestep)/log(10)+1)];
-			sprintf(filename, "%sgasdens%u.dat", outputDirectory, timestep);
+			sprintf(filename, "%s/gasdens%u.dat", outputDirectory, timestep);
 			ret = loadGrid(quantity, filename, true);
 			break;
 
 		case TEMPERATURE:
 			filename = new char[strlen(outputDirectory)+1+19+(unsigned int)(log(timestep)/log(10)+1)];
-			sprintf(filename, "%sgasTemperature%u.dat", outputDirectory, timestep);
+			sprintf(filename, "%s/gasTemperature%u.dat", outputDirectory, timestep);
 			ret = loadGrid(quantity, filename, true);
 			break;
 
 		case V_RADIAL:
 			filename = new char[strlen(outputDirectory)+1+19+(unsigned int)(log(timestep)/log(10)+1)];
-			sprintf(filename, "%sgasvrad%u.dat", outputDirectory, timestep);
+			sprintf(filename, "%s/gasvrad%u.dat", outputDirectory, timestep);
 			ret = loadGrid(quantity, filename, false);
 			break;
 
 		case V_AZIMUTHAL:
 			filename = new char[strlen(outputDirectory)+1+19+(unsigned int)(log(timestep)/log(10)+1)];
-			sprintf(filename, "%sgasvtheta%u.dat", outputDirectory, timestep);
+			sprintf(filename, "%s/gasvtheta%u.dat", outputDirectory, timestep);
 			ret = loadGrid(quantity, filename, false);
 			break;
 
