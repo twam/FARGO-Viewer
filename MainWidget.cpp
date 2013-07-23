@@ -1,5 +1,6 @@
 #include "MainWidget.h"
 
+#include <stdlib.h>
 #include <QApplication>
 #include <QStyle>
 #include <QIntValidator>
@@ -555,7 +556,10 @@ void MainWidget::loadSimulation(QString filename)
 		delete simulation;
 		setSimulation(NULL);
 		simulation = new FARGO;
-		if (simulation->loadFromFile(filename.toAscii().data()) == 0) {
+
+		char *full_filename = realpath(filename.toAscii().data(), NULL);;
+
+		if ((full_filename != NULL) && (simulation->loadFromFile(full_filename) == 0)) {
 			setSimulation(simulation);
 			settings->setValue("lastSimulation", filename);
 		} else {
@@ -563,6 +567,7 @@ void MainWidget::loadSimulation(QString filename)
 			msgBox.setText(QString("Failed to open '%1'.").arg(filename));
 			msgBox.exec();
 		}
+		free(full_filename);
 	}
 }
 
