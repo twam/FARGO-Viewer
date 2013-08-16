@@ -137,6 +137,21 @@ int FARGO::loadFromFile(const char* filename)
 
 	    // invalidate temp
 	    free(temp);
+
+	    // output directory could not be found!
+	    if (planetConfigFilename == NULL) {
+	    	// try again with ..
+		    if (asprintf(&temp, "%s/../%s", configDirname, config::value_as_string("PLANETCONFIG"))<0) {
+		    	fprintf(stderr, "Not enough memory.");
+				exit(-1);
+		    }
+
+		    // create realpath of output directory
+		    planetConfigFilename = realpath(temp, NULL);
+
+		    // invalidate temp
+		    free(temp);
+	    }
 	} else {
 		planetConfigFilename = NULL;
 	}
@@ -188,6 +203,7 @@ int FARGO::loadFromFile(const char* filename)
 	planetMasses[0] = 1.0;
 //	planetRadii[0] = config::value_as_double_default("StarRadius", 0.009304813);
 	planetRadii[0] = config::value_as_double_default("StarRadius", 0.009304813*10);
+
 
 	if (planetConfigFilename != NULL) {
 		fd = fopen(planetConfigFilename, "r");
