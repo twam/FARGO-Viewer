@@ -309,9 +309,9 @@ int FARGO::loadTimestep(unsigned int timestep)
 		filename = new char[strlen(outputDirectory)+1+10+(unsigned int)(log(NPlanets)/log(10)+1)];
 
 		if (version == FARGO_TWAM) {
-			sprintf(filename, "%splanet%u.dat", outputDirectory, i);
+			sprintf(filename, "%s/planet%u.dat", outputDirectory, i);
 		} else {
-			sprintf(filename, "%splanet%u.dat", outputDirectory, i-1);
+			sprintf(filename, "%s/planet%u.dat", outputDirectory, i-1);
 		}
 
 		fd = fopen(filename,"r");
