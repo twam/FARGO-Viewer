@@ -138,9 +138,11 @@ void MainWidget::createMenu()
 	fileMenu = new QMenu(tr("&File"), this);
 
 	openAction = fileMenu->addAction(tr("&Open"));
+	openAction->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_O));
 	connect(openAction, SIGNAL(triggered()), this, SLOT(triggeredOpen()));
 
 	exitAction = fileMenu->addAction(tr("E&xit"));
+	exitAction->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_Q));
 	connect(exitAction, SIGNAL(triggered()), this, SLOT(triggeredExit()));
 
 	menuBar->addMenu(fileMenu);
@@ -363,6 +365,7 @@ void MainWidget::createButtons()
 	validator3->setBottom(0);
 	skipLineEdit->setValidator(validator3);
 	skipLineEdit->setText("0");
+	skipLineEdit->setToolTip(tr("Skip frames"));
 	connect(skipLineEdit, SIGNAL(returnPressed()), this, SLOT(skipUpdate()));
 
 	buttonsLayout = new QHBoxLayout;
@@ -396,6 +399,7 @@ void MainWidget::updateFromSimulation()
 	if (simulation != NULL) {
 		timestepLineEdit->setText(QString("%1").arg(simulation->getCurrentTimestep()));
 		timelineSlider->setValue(simulation->getCurrentTimestep());
+		setLogarithmicAction->setChecked(simulation->getHasLogarithmicGrid());
 	}
 }
 

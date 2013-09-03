@@ -76,6 +76,8 @@ int FARGO::loadFromFile(const char* filename)
 	NAzimuthal = config::value_as_unsigned_int("Nsec");
 	currentTimestep = 0;
 
+	hasLogarithmicGrid = (config::key_exists("RADIALSPACING") && !strcasecmp(config::value_as_string("RADIALSPACING"), "Logarithmic"));
+
 	if (!readGhostCells) {
 		NRadial -= 2;
 	}
@@ -259,21 +261,21 @@ int FARGO::loadFromFile(const char* filename)
 
 	// check for last timestep
 	if (version == FARGO_TWAM) {
-		temp = new char[strlen(outputDirectory)+1+15];
-		sprintf(temp, "%s/Quantities.dat", outputDirectory);
-		fd = fopen(temp, "r");
-		delete [] temp;
+		temp = new char[strlen(outputDirectory)+1+12+(unsigned int)(log(totalTimestep)/log(10)+1)];
 
-		// check in file if exists
-		if (fd != NULL) {
-			unsigned int line = 0;
-			while (fgets(buffer, sizeof(buffer), fd) != NULL) {
-				line++;
+		struct stat buffer;
+		unsigned int lastTimestep;
+		for (unsigned int timestep = 1; timestep <= getLastTimeStep(); timestep++) {
+			sprintf(temp, "%s/gasdens%u.dat", outputDirectory, timestep);
+			if (stat(temp, &buffer) == 0) {
+				lastTimestep = timestep;
 			}
-			totalTimestep = line-2;
-
-			fclose(fd);
+			else {
+				break;
+			}
 		}
+
+		totalTimestep = lastTimestep;
 	}
 
 	config::clear_config();
@@ -604,6 +606,10 @@ double FARGO::getRMin() const {
 
 double FARGO::getRMax() const {
 	return rMax;
+}
+
+bool FARGO::getHasLogarithmicGrid() const {
+	return hasLogarithmicGrid;
 }
 
 const double* FARGO::getRadii() const {
