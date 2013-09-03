@@ -39,6 +39,7 @@ class FARGO : public Simulation
 		unsigned int getNAzimuthal() const;
 		double getRMin() const;
 		double getRMax() const;
+		bool getHasLogarithmicGrid() const;
 		const double* getRadii() const;
 		const double* getQuantity() const;
 		void setQuantityType(Simulation::QuantityType type);
@@ -56,6 +57,7 @@ class FARGO : public Simulation
 		char *outputDirectory;
 		unsigned int NRadial;
 		unsigned int NAzimuthal;
+		bool hasLogarithmicGrid;
 		unsigned int totalTimestep;
 		unsigned int currentTimestep;
 		double rMin;

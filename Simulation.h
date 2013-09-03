@@ -43,6 +43,7 @@ class Simulation : public QObject
 		virtual unsigned int getNAzimuthal() const = 0;
 		virtual double getRMin() const = 0;
 		virtual double getRMax() const = 0;
+		virtual bool getHasLogarithmicGrid() const = 0;
 		virtual const double* getRadii() const = 0;
 		virtual const double* getQuantity() const = 0;
 		virtual void setQuantityType(QuantityType type) = 0;

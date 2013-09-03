@@ -76,6 +76,8 @@ int FARGO::loadFromFile(const char* filename)
 	NAzimuthal = config::value_as_unsigned_int("Nsec");
 	currentTimestep = 0;
 
+	hasLogarithmicGrid = (config::key_exists("RADIALSPACING") && !strcasecmp(config::value_as_string("RADIALSPACING"), "Logarithmic"));
+
 	if (!readGhostCells) {
 		NRadial -= 2;
 	}
@@ -604,6 +606,10 @@ double FARGO::getRMin() const {
 
 double FARGO::getRMax() const {
 	return rMax;
+}
+
+bool FARGO::getHasLogarithmicGrid() const {
+	return hasLogarithmicGrid;
 }
 
 const double* FARGO::getRadii() const {

@@ -399,6 +399,7 @@ void MainWidget::updateFromSimulation()
 	if (simulation != NULL) {
 		timestepLineEdit->setText(QString("%1").arg(simulation->getCurrentTimestep()));
 		timelineSlider->setValue(simulation->getCurrentTimestep());
+		setLogarithmicAction->setChecked(simulation->getHasLogarithmicGrid());
 	}
 }
 
