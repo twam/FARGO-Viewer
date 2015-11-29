@@ -1,6 +1,5 @@
-
 version.target = version.h
-version.commands = echo "\\$${LITERAL_HASH}ifndef _VERSION_H_\\\\nconst char git_version[] = \\\"`git describe --tags --always --dirty`\\\"\\;\\\\n\\$${LITERAL_HASH}endif" > version.h
+version.commands = echo "\\$${LITERAL_HASH}ifndef _VERSION_H_" > version.h && echo "const char git_version[] = \\\"`git describe --tags --always --dirty`\\\"\\;" >> version.h && echo "\\$${LITERAL_HASH}endif" >> version.h
 version.depends = .git
 QMAKE_EXTRA_TARGETS += version
 PRE_TARGETDEPS += version.h
