@@ -1,0 +1,25 @@
+language: cpp
+
+before_install:
+  - if [ `uname` = "Darwin" ]; then
+    brew update;
+    brew install qt glew;
+    fi
+
+addons:
+  apt:
+    packages:
+      - libqt4-dev
+      - qt4-qmake
+      - libglew-dev
+
+os:
+  - linux
+  - osx
+
+compiler:
+  - gcc
+  - clang
+
+script:
+  - qmake && make
